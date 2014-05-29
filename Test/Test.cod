@@ -1,0 +1,103 @@
+class "Test";
+  import Classes Conversion;
+  import Classes Calling;
+  import Classes Client;
+  import Classes Examples;
+  import Classes Convinience;
+inclass
+
+inobject
+var Out:String;
+var Inp:String;
+
+var RPCUrl:String;
+var RPCMeth:String;
+
+var filter_by:TemplateSection;
+var Key:String[];
+var Value:String[];
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
+
+  proc Button1OnClick(Sender :Button);
+  var doc,root:AutoObject;
+  var testSt:Storage;
+  doc=AutoObject.Create("Msxml2.DOMDocument.6.0");
+  doc.Async=False;
+  doc.loadXML('<?xml version="1.0" encoding="windows-1251"?>');
+  root=AsXmlRpcNode(doc,tInt);
+  if tInt=FromXmlRpc(root) then
+        Message("Int Ok");
+  end;
+  root=AsXmlRpcNode(doc,tNum);
+  if tNum=FromXmlRpc(root) then
+        Message("Numeric Ok");
+  end;
+  root=AsXmlRpcNode(doc,tStr);
+  if tStr=FromXmlRpc(root) then
+        Message("String Ok");
+  end;
+  root=AsXmlRpcNode(doc,tDat);
+  if tDat=FromXmlRpc(root) then
+        Message("Date Ok");
+  end;
+  root=AsXmlRpcNode(doc,tArr);
+  if tArr=FromXmlRpc(root) then
+        Message("Array Ok");
+  end;
+  --doc.CreateElement("test");
+--  doc.AppendChild(root);
+--  root.AppendChild(AsXmlRpcNode(doc,tInt));
+
+ -- root.AppendChild(AsXmlRpcNode(doc,tStr));
+--  root.AppendChild(AsXmlRpcNode(doc,tDat));
+--  root.AppendChild(AsXmlRpcNode(doc,tArr));
+--  testSt=Storage.Create;
+--  testSt.first="first";
+--  testSt.next="nest";
+--  root.AppendChild(AsXmlRpcNode(doc,testSt));
+--  Out=doc.xml;
+
+
+  end;
+
+  proc Button2OnClick(Sender :Button);
+    Out=Caller(Inp);
+  end;
+
+  proc Button3OnClick(Sender :Button);
+  var xRes,x1:AutoObject;
+    xRes=AutoObject.Create("Msxml2.DOMDocument.6.0");
+    xRes.Async=False;
+    xRes.loadXML('<?xml version="1.0" encoding="windows-1251"?>');
+    x1=EncodeParams(xRes,[GetRecordData(Inp)]);
+    xRes.AppendChild(x1);
+    Out=xRes.xml;
+  end;
+
+
+  proc Button4OnClick(Sender :Button);
+    Out=Encode64(Inp);
+  end;
+
+  proc Button5OnClick(Sender :Button);
+    Out=Decode64(Inp);
+  end;
+
+  proc Button21OnClick(Sender :Button);
+  var params: variant[];
+  var filter: Storage;
+  var i:Integer;
+  var res: variant;
+    filter = Storage.Create;
+    for i = 1..filter_by.Count do
+        filter.SetField(Key[i], Value[i]);
+    end;
+    params[1] = filter;
+    res = SimpleCall(RPCUrl,RPCMeth,params);
+    Out = Str(res);
+  end;
+
+--}
+
+end

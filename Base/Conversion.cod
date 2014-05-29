@@ -1,0 +1,252 @@
+class  'Преобразование Типов между ТБ и XML-RPC';
+  import СИС2 Classes СтроковыеФункции;
+InClass Public
+  --Служебное,но полезное
+  func ZeroStr(Src:Integer;Size:Integer):String;
+  var l,i:Integer;
+  var Stri:String;
+    Stri=Str(Src);
+    l=Length(Stri);
+    if i<Size then
+       for i = 1..Size-l do
+           Stri="0"+Stri;
+       end;
+    end;
+    Result = Stri;
+  end;
+
+  proc AddInArray(var Array:Variant[]; Item:Variant);
+  var l:Integer;
+      l=LengthOfArray(Array);
+      Array[l+1]=Item;
+  end; 
+       --                   111111111122222222223333333333444444444455555555556666
+  --Base64        0123456789012345678901234567890123456789012345678901234567890123
+  var b64:String="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  func EncodeBlock64(Inp:String):String;
+  var c1,c2,c3,c1l,c1u,c2l,c2u,c3l,c3u,o1,o2,o3,o4:Integer;
+    c1=Ord(Substr(Inp,1,1));c1u=Mod(c1,4); c1l=Div(c1,4);
+    c2=Ord(Substr(Inp,2,1));c2u=Mod(c2,16); c2l=Div(c2,16);
+    c3=Ord(Substr(Inp,3,1));c3u=Mod(c3,64);  c3l=Div(c3,64);
+    o1=c1l+1;
+    if c2=-1 then
+       Return (b64[o1]+b64[c1u*16+1]+"==");
+    end;
+    o2=c1u*16+c2l+1;
+    if c3=-1 then
+       Return (b64[o1]+b64[o2]+b64[c2u*4+1]+"=");
+    end;
+    o3=c2u*4+c3l+1;
+    o4=c3u+1;
+    Result = b64[o1]+b64[o2]+b64[o3]+b64[o4];
+  end;
+
+  func Encode64(Input:String):String;
+  var Buf,Res:String;
+  var p:Integer;
+    Buf=Substr(Input,1,3);p=1;
+    while Buf<>"" do
+      Res=Res+EncodeBlock64(Buf);
+      if Mod(p-1,57)=0 then Res=Res+chr(10)+chr(13); end;
+      p=p+3;
+      Buf=Substr(Input,p,3);
+    od;
+    Result = Res;
+  end;
+
+  func DecodeBlock64(Input:String):String;
+  var c1,c2,c3,c1l,c1u,c2l,c2u,c3l,c3u,o1,o2,o3,o4:Integer;
+  var b1,b2,b3,b4:String;
+    --Разбиение на символы
+    b1=Substr(Input,1,1);b2=Substr(Input,2,1);b3=Substr(Input,3,1);b4=Substr(Input,4,1);
+    --Символы в коды по таблице
+    o1=CharPos(b1,b64)-1;
+    o2=CharPos(b2,b64)-1;
+    o3=if(b3="=",0,CharPos(b3,b64)-1);
+    o4=if(b4="=",0,CharPos(b4,b64)-1);
+    --Разбиение кодов на части
+    c1l=o1;
+    c1u=Div(o2,16);c2l=Mod(o2,16);
+    c2u=Div(o3,4);c3l=Mod(o3,4);
+    c3u=o4;
+    --Переобъединение кодов
+    c1=c1l*4+c1u; c2=c2l*16+c2u; c3=c3l*64+c3u;
+    --Вывод
+    if b3="=" then
+       Result = Chr(c1);
+    elsif b4="=" then
+       Result = Chr(c1)+Chr(c2);
+    else 
+      Result = Chr(c1)+Chr(c2)+Chr(c3);
+    end;
+  end;
+
+  func Decode64(Input:String):String;
+  var Buf,Res:String;
+  var p:Integer;
+    Input=УдалитьИзСтроки(Input,chr(10));
+    Input=УдалитьИзСтроки(Input,chr(13));
+    Buf=Substr(Input,1,4);p=1;
+    while Buf<>"" do
+      Res=Res+DecodeBlock64(Buf);
+      p=p+4;
+      Buf=Substr(Input,p,4);
+    od;
+    Result = Res;
+  end;
+
+  --Конверсии в ноды и обратно
+  func AsXmlRpcNode(var aDoc:AutoObject; aVar:Variant):AutoObject;
+  var Res,sub1,sub2,txt:AutoObject;
+  var arr:Variant[];
+  var t,i:Integer;
+  var bVar:BinaryObject;
+    t=VarType(aVar);
+    if t=varString then
+       Res=aDoc.CreateElement("string");
+       txt=aDoc.CreateTextNode(aVar);
+       Res.AppendChild(txt);
+    elsif t=varInt then
+       Res=aDoc.CreateElement("i4");
+       txt=aDoc.CreateTextNode(Str(aVar));
+       Res.AppendChild(txt);
+    elsif t=varNumeric then
+       Res=aDoc.CreateElement("double");
+       txt=aDoc.CreateTextNode(Str(aVar));
+       Res.AppendChild(txt);
+    elsif t=varLogical then
+       Res=aDoc.CreateElement("boolean");
+       if aVar then
+          txt=aDoc.CreateTextNode("1");
+       else
+          txt=aDoc.CreateTextNode("0");
+       end;
+       Res.AppendChild(txt);
+    elsif t=varDate then
+       Res=aDoc.CreateElement("dateTime.iso8601");
+       txt=aDoc.CreateTextNode(Str(Year(aVar))+ZeroStr(Mon(aVar),2)+ZeroStr(Day(aVar),2)
+       +"T"+ZeroStr(Hour(aVar),2)+":"+ZeroStr(Minute(aVar),2)+":"+ZeroStr(Int(Second(aVar)),2));
+       Res.AppendChild(txt);
+    elsif t=varArray then
+       arr=aVar as Variant[];
+       Res=aDoc.CreateElement("array");
+       sub1=aDoc.CreateElement("data");
+       Res.AppendChild(sub1);
+       sub2=aDoc.CreateElement("value");
+       sub1.AppendChild(sub2);
+
+       for i = 1..LengthOfArray(arr) do
+         sub2=aDoc.CreateElement("value");
+         sub1.AppendChild(sub2);
+         txt=AsXmlRpcNode(aDoc,arr[i]);
+         sub2.AppendChild(txt);
+       end;
+    elsif t=varObject then
+      if aVar is Storage then
+         Res=aDoc.CreateElement("struct");
+         for i = 1..aVar.Count do
+           sub1=aDoc.CreateElement("member");
+           sub2=aDoc.CreateElement("name");
+           txt=aDoc.CreateTextNode(aVar.IndexByNumber[i]);
+           sub2.AppendChild(txt);
+           sub1.AppendChild(sub2);
+           sub2=aDoc.CreateElement("value");
+           txt=AsXmlRpcNode(aDoc,aVar.ItemsByNumber[i]);
+           sub2.AppendChild(txt);
+           sub1.AppendChild(sub2);
+           Res.AppendChild(sub1);
+         end;
+      elsif aVar is BinaryObject then
+         bVar=aVar as BinaryObject;
+         Res=aDoc.CreateElement("base64");
+         txt=aDoc.CreateTextNode(Encode64(bVar.AsString));
+         Res.AppendChild(txt);
+      end;
+    elsif aVar=nil then
+       --временная поддержка как пустого значения. В будущем - использовать расширение None
+       Res=aDoc.CreateElement("boolean");
+       txt=aDoc.CreateTextNode("0");
+       Res.AppendChild(txt);
+    end;
+    Result=Res;
+  end;
+
+  func GetNodeValue(Node:AutoObject):String;
+  var sub1:AutoObject;
+  var i:Integer;
+      sub1=Node.childNodes;
+      for i = 1..sub1.length do
+         if sub1.item(i-1).nodeType=3 or sub1.item(i-1).nodeType=4 then
+            Result = sub1.item(i-1).nodeValue;
+            break;
+         fi;
+      od;
+
+  end;
+
+  func FromXmlRpc(Node:AutoObject):Variant;
+  var sub1,sub2,sub3:AutoObject;
+  var i,j,k:Integer;
+  var Res:Variant;
+  var aRes:Variant[];
+  var sRes:Storage;
+  var txt:String;
+  var bVar:BinaryObject;
+    if Lo(Node.nodeName)="string" then
+       Result=GetNodeValue(Node);
+    elsif Lo(Node.nodeName)="i4" or Lo(Node.nodeName)="int" then
+       Result=Int(GetNodeValue(Node));
+    elsif Lo(Node.nodeName)="double" then
+       Result=Num(GetNodeValue(Node));
+    elsif Lo(Node.nodeName)="boolean" then
+       Result=(GetNodeValue(Node)="1");
+    elsif Lo(Node.nodeName)="dateTime.iso8601" then
+       txt=GetNodeValue(Node);
+       Result=CreateDate(Int(Substr(txt,7,2)),Int(Substr(txt,5,2)),Int(Substr(txt,1,4)),Int(Substr(txt,10,2)),Int(Substr(txt,13,2)),Int(Substr(txt,16,2)));
+    elsif Lo(Node.nodeName)="base64" then
+       bVar=BinaryObject.Create;
+       bVar.AsString=Decode64(GetNodeValue(Node));
+       Result=bVar;
+    elsif Lo(Node.nodeName)="array" then
+      sub1=Node.childNodes;--getElementsByTagName("data");
+      for i = 1..sub1.length do
+         if Lo(sub1.item(i-1).nodeName)="data" then
+            sub2=sub1.item(i-1).childNodes;--getElementsByTagName("value");
+            aRes=[];
+            for j = 1..sub2.length do
+              if Lo(sub2.item(i-1).nodeName)="value" then
+                sub3=sub2.item(j-1).childNodes;
+                for k = 1..sub3.length do
+                  if sub3.item(k-1).nodeType=1 then
+                     AddInArray(aRes,FromXmlRpc(sub3.item(k-1)));
+                  end;
+                end;
+              end;
+            end;
+         end;
+      end;
+      Result=aRes;
+    elsif Lo(Node.nodeName)="struct" then
+      sRes=Storage.Create;
+      sub1=Node.childNodes;
+      --sub1=Node.getElementsByTagName("member");
+      for i = 1..sub1.length do
+         if Lo(sub1.item(i-1).nodeName)="member" then
+            sub2=sub1.item(i-1).childNodes;
+            for j = 1..sub2.length do
+              if Lo(sub2.item(j-1).nodeName)="name" then
+                 txt=GetNodeValue(sub2.item(j-1));
+              elsif Lo(sub2.item(j-1).nodeName)="value" then
+                 Res= FromXmlRpc(sub2.item(j-1).firstChild);
+              end;
+            end;
+            sRes.SetField(txt,Res);
+         end;
+      end;
+      Result=sRes;
+    else
+      Result=nil;
+    end;
+  end;
+
+end

@@ -1,0 +1,41 @@
+class inherited DynamicObject "";
+import classes Client;
+inclass
+  func CreateEx(URL :String):XMLRPC_Proxy;
+    Result = Create;
+    Result.URL = URL;
+  end;
+inobject
+  var URL:String;
+  func _Execute_single(Method:string;Params:Variant[]):Variant;
+    Result = SimpleCall(URL, Method, Params)[1];
+  end;
+
+  proc _Register_method(Name:String;
+                        Params:String[2];
+                        res_single:Logical=true);
+  -- Params [Name, Type]
+  var vSource :String[];
+  var i: Integer;
+  var ii:Integer;
+      vSource[1] = "func "+ Name;
+      ii = LengthOfArray(Params);
+      if ii > 0 then
+          vSource[1] = vSource[1] + "(";
+          for i = 1..ii do
+              vSource[i + 1] = Params[i, 1] + ":" + Params[i, 2] + if(i = ii, '', ';');
+          end;
+          vSource[ii + 1] = vSource[ii + 1] + ")";
+      end;
+      vSource[ii + 2] = " :Variant;";
+      vSource[ii + 3] = "  Result = _Execute_single('"+ Name+"', [";
+      for i = 1..ii do
+          vSource[ii + i + 3] = Params[i, 1] + if(i = ii, '', ',');
+      end;
+      vSource[2 * ii + 4] = "]);";
+      vSource[2 * ii + 5] = "end;";
+      AddMethod(vSource);
+
+  end;
+
+end

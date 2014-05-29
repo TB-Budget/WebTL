@@ -1,0 +1,51 @@
+class "Простейшее формирование XML";
+import classes Conversion;
+inclass public
+  func EasyStrorage(src: String):Storage;
+  -- Key1=Value1#Key2=Value2
+    var myStorage:Storage;
+    var i, ii:Integer;
+    var one:String;
+    myStorage = Storage.Create;
+    ii = WordsCount(src, "#");
+    for i = 1..ii do
+        one = ExtractWord(src, i, "#");
+        myStorage.SetField(ExtractWord(one, 1, "="), ExtractWord(one, 2, "="));
+    end;
+    Result = myStorage;
+  end;
+
+inobject private
+  Data[]:String; --Набор данных XML. Массив используется для добавления в конец без переприсвоения
+  Depth[]:String; --Список открытых тэгов. FIFO-буфер для закрытия тэгов.
+inobject public
+  proc ВРез synonym ToRes(more: String);
+     AddInArray(Data, more);
+  end;
+
+  proc ОткрытьТэг synonym OpenTag(Name: String; Attrib: Storage);
+    var I:Integer;
+    ToRes("<" + Name);
+    for i = 1..Attrib.Count do
+       ToRes(" " + Attrib.IndexByNumber[i] + "='");
+       ToRes(Str(Attrib.ItemsByNumber[i]) + "'");
+    end;
+    ToRes(">");
+    InsertInArray(Depth, 1, Name);
+  end;
+
+  func ЗакрытьТэг synonym CloseTag: String;
+    var Name:String;
+    Name = Depth[1];
+    DeleteFromArray(Depth,1);
+    ToRes("</" + Name + ">");
+    Result = Name;
+  end;
+
+  proc СоздатьТэг synonym CreateTag(Name: String; Content: String; Attrib: Storage);
+     OpenTag(Name, Attrib);
+     ToRes(Content);
+     CloseTag;
+  end;
+
+end

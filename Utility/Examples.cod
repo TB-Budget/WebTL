@@ -1,0 +1,12 @@
+class  'Примеры типов ТБ для тестов';
+
+InClass Public
+  var tInt:Integer=7206781;
+  var tStr:String="Это тест";
+  var tLog:Logical=True;
+  var tNum:Numeric=321.67;
+  var tDat:Date=CreateDate(17,05,1985,1,15,02);
+  var tArr:Integer[]=[1,2,3];
+InObject Private
+
+end

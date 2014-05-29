@@ -1,0 +1,52 @@
+class  'Метод класса как экземпляр функции';
+  Import СИС2 Classes оперСистемные;
+
+InClass Public
+  func CreateEx(aMethodName :String):ClassMeth;
+    Result = Create;
+    Result.FromString(aMethodname);
+  end;
+
+InObject Private
+  myClass:Class;
+  myMeth:MethodInfo;
+
+InObject Public
+  proc Загрузить synonym Load(aClass:Class;aMeth:MethodInfo);
+    myClass=aClass;
+    myMeth=aMeth;
+  end;
+
+  proc ИзСтроки synonym FromString(aMethodName :String);
+  var i:Integer;
+  var sCl,sMe:String;
+    i = WordsCount(aMethodName, '.');
+    sMe = ExtractWord(aMethodName, i, '.');
+    sCl = SubStr(aMethodName, 1, Length(aMethodName) - Length(sMe) - 1);
+    if sCl = '' then 
+      SetError(0,"Метод не найден, проверьте задание имени класса");
+    end;
+    myClass  = FindClass(sCl);
+    if myClass = nil then
+       SetError(0,"Класс "+sCl+" не найден");
+    end;
+    myMeth = ПолучитьИнфоМетода(myClass, sMe);
+  end;
+
+  func Вызвать synonym Call(Params:Variant[]):Variant;
+    if myMeth.Kind=2 then--MethodInfo.MethodKind("mkFunc") then
+       Result=myMeth.CallFuncEx(myClass,Params);
+    elsif myMeth.Kind=1 then--MethodInfo.MethodKind("mkProc") then
+       try
+         myMeth.CallProcEx(myClass,Params);
+         Result=True;
+       except
+         Result=False;
+         raise;
+       end;
+    else
+      SetError(0,"Метод не является процедурой или функцией");
+      Result=False;
+    end;
+  end;
+end

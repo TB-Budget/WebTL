@@ -1,0 +1,84 @@
+class  'Полезные функции';
+   import СИС2 Classes Web.Utils;
+
+InClass Public
+
+--   Function: GetRowData
+--
+--   Возвращает даные строки в виде хранилища
+--
+--   Parameters:
+--
+--      Data - Объект строки(записи)
+--      FetchIntrenal - Извлекать ли служебные поля
+--
+--   Returns:
+--
+--      Хранилище объектов
+--
+--   See Also:
+--
+--      <GetRecordData>
+
+   func GetRowData(Data:Variant; FetchIntrenal:Logical=False):Storage;
+   var RecInfo:ClassInfo;
+   var Member:MethodInfo;
+   var n,nn:Integer;
+   var MustIgnore:String[];
+   var Value:Variant;
+   var VClassI:ClassInfo;
+     MustIgnore=["ТипКласса","ClassType","НовыйКлючЗаписи","НовыйКлючДокумента","NewDocID"];
+     RecInfo=Data.ClassInfo;
+     Result = Storage.Create;
+     nn=RecInfo.MembersCount;
+     for n = 1..nn do
+         if RecInfo.Member[n] is MethodInfo then
+           Member =RecInfo.Member[n] as MethodInfo;
+           if not Member.Internal or FetchIntrenal then
+              if Member.VisualArea=1 and Member.Kind=0 and not Member.InClassProperty and not (Member.Name in MustIgnore) then
+              if Member.ParamsCount=0 then
+                 if Member.ResultType.VarType=6 then
+                    VClassI=Member.ResultType;
+                    if VClassI is SubtableClassInfo then
+                       Value=GetSubtableData(Data.GetField(Member.Name),FetchIntrenal);
+                    elsif VClassI is StructureClassInfo then
+                       Value=GetRowData(Data.GetField(Member.Name),FetchIntrenal);
+                    end;
+                 else
+                    Value=Data.GetField(Member.Name);
+                 end;
+              else 
+                 Value=nil;
+              end;
+              Result.SetField(Member.Name,Value);
+           end;
+           end;
+         end;
+     end;
+   end;
+
+   func GetSubtableData(Subt:Subtable; FetchIntrenal:Logical=False):Storage;
+   var i:Integer;
+      Result = Storage.Create;
+      for i = 1..Subt.Count do
+          Result.SetField(Str(Subt.IndexByNumber[i]),GetRowData(Subt.ItemsByNumber[i],FetchIntrenal));
+      end;
+   end;
+
+   func GetRecordData(RecordKey:String; FetchIntrenal:Logical=False):Storage;
+   var Rec:Document;
+   var RecInfo:RecordClassInfo;
+   var Member:MethodInfo;
+   var n,nn:Integer;
+   var MustIgnore:String[];
+   var Value:Variant;
+   var VClassI:ClassInfo;
+     if Substr(recordKey,1,1)<>"{" then
+        recordKey="{"+Recordkey+"}";
+     end;
+     Rec=GetDocByID(RecordKey);
+     Result=GetRowData(Rec,FetchIntrenal);
+   end;
+InObject Private
+
+end
