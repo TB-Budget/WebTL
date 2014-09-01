@@ -1,0 +1,23 @@
+class "";
+
+inclass
+
+inobject
+ timer1: Timer;
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
+
+  proc BlankOnOpen(Create :Logical);
+    -- Вызывается при открытия окна формы
+    --   Create: True - форма открывается, False - форма восстанавливается при запуске сессии
+    timer1 = timer.Create(self);
+    timer1.Ontimer = "EndWait";
+    timer1.Active = true;
+  end;
+
+  proc EndWait(timer_:Timer);
+    Close;
+  end;
+--}
+
+end

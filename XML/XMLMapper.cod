@@ -1,0 +1,130 @@
+class "Сопоставитель XML с объектами Турбо9";
+inclass
+
+inobject
+  var namespace: String; --Пространство имен для типа XML (опционально)
+  var xmltype: String; --Имя типа XML (если есть)
+  var t9class: Variant; --Ссылка на класс Т9, если пусто - Storage
+  var fields: MapperNode[]; --Список элементов
+  var allowreflection: Logical; --Позволить автоматическое создание полей.
+                                --Для загрузки это требует типа Storage и все значения будут строками
+                                --                                      массивы не допускаются
+                                --При выгрузке это генерирует элементы по именам полей
+
+  func LoadNodeValue(Node:AutoObject; nodetype:Variant):variant;
+    var tmpS:String;
+
+    if varType(nodetype) = 2 then
+      --Простые типы
+      --varString  :Integer = 1;  -- строка
+      if nodetype = 1 then
+         Result = Node.text;
+      --varInt     :Integer = 2;  -- 4-байтовое целое
+      elsif nodetype = 2 then
+         Result =  Int(Node.text);
+      --varNumeric :Integer = 3;  -- Число с плавающей точкой
+      elsif nodetype = 3 then
+         --TODO: Экспоненциальный формат
+         Result =  Num(Node.text);
+     --varLogical :Integer = 4;  -- Логическое (булево) значение
+      elsif nodetype = 4 then
+         tmpS =  Node.text;
+         if tmpS = nil or tmpS = '0' or Lo(tmpS)='false' or Lo(tmpS)='ложь' then
+            Result = False;
+         else
+            Result = True;
+         end;
+      --varDate    :Integer = 5;  -- ДатаВремя в формате TDateTime
+      end;
+    elsif varType(nodetype) = 6:
+      --Объектные типы
+      if nodetype.Classtype = XMLMapper then
+         Result = nodetype.ParseNode(Node);
+      end;
+    end;
+  end;
+
+  func GetNodeField(Node:AutoObject; Nodedesc:MapperNode):Variant;
+    -- Здесь перебираем узлы
+    var sub1: AutoObject;
+    var i: Integer;
+    var resa: Variant[];
+    var res_:Variant;
+    sub1 = Node.childNodes;
+    i = 0;
+    While i < sub1.length do
+       if (sub1.item(i).nodeName = Nodedesc.nodename and sub1.item(i).nodeType =  Nodedesc.nodekind) or
+          (Nodedesc.nodekind = 3 and sub1.item(i).nodeType =  Nodedesc.nodekind) then
+          --Загружаем узел
+          res_ = LoadNodeValue(sub1.item(i), nodedesc.nodetype);
+          --Удаляем узел
+          Node.removeChild(sub1.item(i));
+          --Сохраняем значение
+          if Nodedesc.repeatable then
+            СИС2.Функции.AddInArray(resa, res_);
+          else
+            Break;
+          end;
+       else
+         i = i + 1;
+       end; --/загрузка узла
+    od;
+    --Загрузка атрибутов. 
+    --Непонятно могли ли они быть загружены на предыдущем шаге, но если могли - их удалили.
+    if Nodedesc.nodekind = 2 then
+      sub1 = Node.attributes;
+      i = 0;
+      While i < sub1.length do
+         if sub1.item(i).nodeName = Nodedesc.nodename and sub1.item(i).nodeType =  Nodedesc.nodekind then
+            --Загружаем узел
+            res_ = LoadNodeValue(sub1.item(i), nodedesc.nodetype);
+            --Узел удалять не надо - атрибуты уникальны.
+            --Сохраняем значение
+            if Nodedesc.repeatable then
+              СИС2.Функции.AddInArray(resa, res_);
+            else
+              Break;
+            end;
+         else
+           i = i + 1;
+         end; --/загрузка узла
+      od;
+    fi;--/загрузка атрибутов
+
+    if Nodedesc.repeatable then
+      Result = resa;
+    else
+      Result = res_;
+    fi;
+  end;
+
+  func ParseNode(Node:AutoObject):Object;
+    --Здесь перебираем Поля
+    var res:Object;
+    var val:Variant;
+    var i: Integer;
+    var ii: Integer;
+    var sub1:AutoObject;
+    var wrk:AutoObject;
+
+    wrk = Node.cloneNode(True); --Копируем узел, т.к. в процессе обработки будем удалять дочерние узлы.
+    if t9class = nil then
+       res = Storage.Create;
+    end;
+    ii = lengthOfArray(fields);
+    for i = 1..ii do
+        val = GetNodeField(wrk, fields[i]);
+        res.SetField(fields[i].fieldname, val);
+    end;
+    if allowreflection then
+      --рефлексия
+      --Перебираем оставшиеся узлы
+      sub1=wrk.childNodes;
+      for i = 1..sub1.length do
+          res.SetField(sub1.item(i-1).nodeName, sub1.item(i-1).text);
+      od;
+    end;
+
+    Result = res;
+  end;
+end

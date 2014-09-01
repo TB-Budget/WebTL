@@ -1,0 +1,37 @@
+class "Библиотека непрофильных функций";
+
+inclass
+  func Filter(predicate: String; const InArray:Object[]):Object[];
+    var i, j, ii:Integer;
+    var OutArray: Object[];
+    ii = LengthOfArray(InArray);
+    j = 1;
+    for i = 1 .. ii do
+      if InArray[i].Evaluate(predicate) then
+        OutArray[j] = InArray[i];
+        j = j + 1;  --это быстрее чем каждый раз вычислять длину OutArray;
+      end;
+    end;
+    Result = OutArray;
+  end;
+
+  func FilterScal(predicate: String; const InArray:Variant[]):variant[];
+    var i, j, ii:Integer;
+    var OutArray: variant[];
+    var one: Storage;
+    ii = LengthOfArray(InArray);
+    j = 1;
+    one = Storage.Create;
+    predicate = "elem " + predicate;
+    for i = 1 .. ii do
+      one.elem = InArray[i];
+      if one.Evaluate(predicate) then
+        OutArray[j] = InArray[i];
+        j = j + 1;  --это быстрее чем каждый раз вычислять длину OutArray;
+      end;
+    end;
+    Result = OutArray;
+  end;
+inobject
+
+end

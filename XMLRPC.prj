@@ -5,6 +5,7 @@
     <Project Name="ÑÈÑ2"/>
   </Usage>
   <Groups>
+    <Group Name="ClientTypes" Type="Classes" Disabled="False"/>
     <Group Name="Types" Type="Classes" Disabled="False"/>
     <Group Name="Base" Type="Classes" Disabled="False"/>
     <Group Name="XML" Type="Classes" Disabled="False"/>

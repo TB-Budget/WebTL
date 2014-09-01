@@ -1,0 +1,18 @@
+class "Узел сопоставления XML с объектом";
+
+inclass
+
+inobject
+  var nodetype: Variant; --Тип узла. Может быть:
+                       --целым от 1 до 5 (см. varType),
+                       --объектом сопоставителя
+  var nodename: String; --Имя узла XML
+  var nodekind: Integer; --Вариант узла:
+                         --1-элемент, 
+                         --2-атрибут,
+                         --3-содержимое (при этом nodename игнорируется)
+  var fieldname: String; --Имя поля объекта Т9
+  var repeatable: Logical; --Узел повторяется (в Т9 представляется массивом соотв. типа)
+
+
+end

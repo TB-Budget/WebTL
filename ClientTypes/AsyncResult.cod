@@ -1,0 +1,123 @@
+class "Отложенный результат выполнения";
+
+inclass
+  func RestAsync(URL:String; Mapper:XMLMapper; Method:String = "GET"):AsyncResult;
+    Result = Create;
+    Result.request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
+    Result.request.open(Method, URL, True);
+    Result.request.send;
+    Result.mapper = Mapper;
+    Result.id = URL;
+  end;
+
+  func XMLRPCAsync(URL:string; Method:string; Params:Variant[]; MultiRes:Logical=True):AsyncResult;
+  --* INPUTS
+  --* URL - адрес сервера XMLRPC
+  --* Method - название вызываемого метода
+  --* Params - список параметров
+    var xReq:AutoObject;
+    Result = Create;
+    Result.request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
+    Result.request.open("POST", URL, True);
+    Result.request.setRequestHeader("Content-Type","text/xml; charset=windows-1251");
+    xReq = Client.EncodeRequest(Method, Params);
+    Result.request.send(xReq);
+    if MultiRes then
+      Result.mapper = 0;
+    else
+      Result.mapper = 1;
+    end;
+    AddCRC32(Result.id, URL);
+    AddCRC32(Result.id, xReq.xml);
+  end;
+
+  func Create:AsyncResult;
+    Result = inherited Create;
+    Result.timer1 = Timer.Create(Result);
+    Result.timer1.Ontimer = "Poll";
+    Result.postprocess = nil;
+  end;
+
+inobject
+  request: AutoObject; --XMLHTTPRequest текущего запроса
+  mapper: Variant; --XMLMapper для REST-XML
+                   --0; 1 - XML-RPC (0 - массив результатов, 1 - первый)
+  id: String; --кеш для сверки
+  postprocess: ClassMeth; --Дополнительная обработка результата
+
+  cb_obj: Object;  --Объект обратного вызова
+  cb_func: String;  --Вызываемый метод с 1 аргументом типа результата
+  timer1: Timer;
+
+  func Equal(ob:AsyncResult):Logical;
+    if ob = nil then
+       return False;
+    end;
+    Result = (ob.id = self.id);
+  end;
+
+  proc AutoPoll(CBObject:Object = nil; CBMeth:String = '');
+    if CBObject <> nil and CBMeth <> '' then
+      self.cb_obj = CBObject;
+      self.cb_func = CBMeth;
+      self.timer1.active = True;
+    end;
+  end;
+
+  proc Poll(T:Timer =nil);
+    var cb_info:MethodInfo;
+    if ready then
+       cb_info = СИС2.ФункцииРТТИ.ПолучитьИнфоМетода(cb_obj.ClassType, cb_func);
+       if cb_info.Kind = 2 then --MethodInfo.MethodKind("mkFunc") then
+          cb_info.CallFunc(self.cb_obj, self.Get);
+       elsif cb_info.Kind = 1 then --MethodInfo.MethodKind("mkProc") then
+          cb_info.CallProc(self.cb_obj, self.Get);
+       fi;
+    end;
+  end;
+
+  func Ready:Logical;
+    --(4) COMPLETED All the data has been received, 
+    -- and the complete data is available in the responseBody and responseText properties.
+    return (request.readystate = 4);
+  end;
+
+  func Get:Variant;
+    var xRes: AutoObject;
+    --Проверяем готовность или дожидаемся ее
+    while not ready do
+      --sleep(1);
+      UIWait.ExecuteDialog;
+    od;
+    --Если было включено автоопрашивание - отключаем;
+    self.timer1.active = false;
+    -- Парсим результат в зависимости от типа запроса
+    if mapper is XMLMapper then
+      xRes = request.responseXML;
+      Result = mapper.ParseNode(xRes.documentElement);
+    elsif varType(mapper) = 2:
+      --XMLRPC
+      if mapper = 1 or mapper = 0 then
+        xRes = request.responseXML;
+        if mapper = 1 then
+          Result = Client.ParseResp(xRes)[1];
+        else
+          Result = Client.ParseResp(xRes);
+        end;
+      end;
+    end;
+    if postprocess <> nil then
+       Result = postprocess.Call([result]);
+    end;
+  end;
+
+  Proc Abort;
+    self.timer1.active = False;
+    request.abort;
+    request = nil;
+    mapper = nil;
+    id = nil;
+  end;
+
+
+end
