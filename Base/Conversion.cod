@@ -218,7 +218,7 @@ InClass Public
                 sub3=sub2.item(j-1).childNodes;
                 for k = 1..sub3.length do
                   if sub3.item(k-1).nodeType=1 then
-                     AddInArray(aRes,FromXmlRpc(sub3.item(k-1)));
+                     СИС2.Функции.AddInArray(aRes,FromXmlRpc(sub3.item(k-1)));
                   end;
                 end;
               end;

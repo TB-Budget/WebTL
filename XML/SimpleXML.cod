@@ -1,5 +1,4 @@
 class "Простейшее формирование XML";
-import classes Conversion;
 inclass public
   func EasyStrorage(src: String):Storage;
   -- Key1=Value1#Key2=Value2
@@ -20,7 +19,7 @@ inobject private
   Depth[]:String; --Список открытых тэгов. FIFO-буфер для закрытия тэгов.
 inobject public
   proc ВРез synonym ToRes(more: String);
-     AddInArray(Data, more);
+     Сис2.Функции.AddInArray(Data, more);
   end;
 
   proc ОткрытьТэг synonym OpenTag(Name: String; Attrib: Storage);

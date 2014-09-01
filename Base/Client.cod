@@ -59,7 +59,7 @@ inclass Public
             sub2=sub1.item(i-1).getElementsByTagName("param");
             for j = 1..sub2.length do
                  --                                          value      само содержимое
-                 AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
+                 СИС2.Функции.AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
             end;
         elsif Lo(sub1.item(i-1).nodeName)="fault" then
          --ОБРАБОТКА ОШИБОК
@@ -90,11 +90,12 @@ inclass Public
   var xRes:AutoObject;
   var hReq,xReq:AutoObject;
 --  var tf:TextFile;
-     hReq=AutoObject.Create("Msxml2.XMLHTTP.6.0");
+    hReq=AutoObject.Create("Msxml2.XMLHTTP.6.0");
     hReq.open("POST", URL, False);
     hReq.setRequestHeader("Content-Type","text/xml; charset=windows-1251");
     xReq=EncodeRequest(Method, Params);
-    hReq.send(xReq);
+    --hReq.send(xReq);
+    hReq.send(xReq.xml);
     xRes=hReq.responseXML;
 --    tf = TextFile.Create('r:\text.xml',fmCreate);
 --    tf.write(hReq.responseText);
