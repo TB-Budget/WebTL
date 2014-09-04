@@ -106,7 +106,9 @@ inobject
     var ii: Integer;
     var sub1:AutoObject;
     var wrk:AutoObject;
-
+    if Node = nil then
+       return nil;
+    end;
     wrk = Node.cloneNode(True); --Копируем узел, т.к. в процессе обработки будем удалять дочерние узлы.
     if t9class = nil then
        res = Storage.Create;

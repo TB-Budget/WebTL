@@ -21,7 +21,8 @@ inclass
     Result.request.open("POST", URL, True);
     Result.request.setRequestHeader("Content-Type","text/xml; charset=windows-1251");
     xReq = Client.EncodeRequest(Method, Params);
-    Result.request.send(xReq);
+--    Result.request.send(xReq);
+    Result.request.send(xReq.xml);
     if MultiRes then
       Result.mapper = 0;
     else
