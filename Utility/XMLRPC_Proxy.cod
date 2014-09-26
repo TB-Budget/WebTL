@@ -1,4 +1,4 @@
-class inherited DynamicObject "";
+﻿class inherited DynamicObject "";
 import classes Client;
 inclass
 --  func Create:XMLRPC_Proxy;

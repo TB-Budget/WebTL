@@ -1,7 +1,7 @@
-class  'Преобразование Типов между ТБ и XML-RPC';
-  import СИС2 Classes СтроковыеФункции;
+п»їclass  'РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РўРёРїРѕРІ РјРµР¶РґСѓ РўР‘ Рё XML-RPC';
+  import РЎРРЎ2 Classes РЎС‚СЂРѕРєРѕРІС‹РµР¤СѓРЅРєС†РёРё;
 InClass Public
-  --Служебное,но полезное
+  --РЎР»СѓР¶РµР±РЅРѕРµ,РЅРѕ РїРѕР»РµР·РЅРѕРµ
   func ZeroStr(Src:Integer;Size:Integer):String;
   var l,i:Integer;
   var Stri:String;
@@ -57,21 +57,21 @@ InClass Public
   func DecodeBlock64(Input:String):String;
   var c1,c2,c3,c1l,c1u,c2l,c2u,c3l,c3u,o1,o2,o3,o4:Integer;
   var b1,b2,b3,b4:String;
-    --Разбиение на символы
+    --Р Р°Р·Р±РёРµРЅРёРµ РЅР° СЃРёРјРІРѕР»С‹
     b1=Substr(Input,1,1);b2=Substr(Input,2,1);b3=Substr(Input,3,1);b4=Substr(Input,4,1);
-    --Символы в коды по таблице
+    --РЎРёРјРІРѕР»С‹ РІ РєРѕРґС‹ РїРѕ С‚Р°Р±Р»РёС†Рµ
     o1=CharPos(b1,b64)-1;
     o2=CharPos(b2,b64)-1;
     o3=if(b3="=",0,CharPos(b3,b64)-1);
     o4=if(b4="=",0,CharPos(b4,b64)-1);
-    --Разбиение кодов на части
+    --Р Р°Р·Р±РёРµРЅРёРµ РєРѕРґРѕРІ РЅР° С‡Р°СЃС‚Рё
     c1l=o1;
     c1u=Div(o2,16);c2l=Mod(o2,16);
     c2u=Div(o3,4);c3l=Mod(o3,4);
     c3u=o4;
-    --Переобъединение кодов
+    --РџРµСЂРµРѕР±СЉРµРґРёРЅРµРЅРёРµ РєРѕРґРѕРІ
     c1=c1l*4+c1u; c2=c2l*16+c2u; c3=c3l*64+c3u;
-    --Вывод
+    --Р’С‹РІРѕРґ
     if b3="=" then
        Result = Chr(c1);
     elsif b4="=" then
@@ -84,8 +84,8 @@ InClass Public
   func Decode64(Input:String):String;
   var Buf,Res:String;
   var p:Integer;
-    Input=УдалитьИзСтроки(Input,chr(10));
-    Input=УдалитьИзСтроки(Input,chr(13));
+    Input=РЈРґР°Р»РёС‚СЊРР·РЎС‚СЂРѕРєРё(Input,chr(10));
+    Input=РЈРґР°Р»РёС‚СЊРР·РЎС‚СЂРѕРєРё(Input,chr(13));
     Buf=Substr(Input,1,4);p=1;
     while Buf<>"" do
       Res=Res+DecodeBlock64(Buf);
@@ -95,7 +95,7 @@ InClass Public
     Result = Res;
   end;
 
-  --Конверсии в ноды и обратно
+  --РљРѕРЅРІРµСЂСЃРёРё РІ РЅРѕРґС‹ Рё РѕР±СЂР°С‚РЅРѕ
   func AsXmlRpcNode(var aDoc:AutoObject; aVar:Variant):AutoObject;
   var Res,sub1,sub2,txt:AutoObject;
   var arr:Variant[];
@@ -163,7 +163,7 @@ InClass Public
          Res.AppendChild(txt);
       end;
     elsif aVar=nil then
-       --временная поддержка как пустого значения. В будущем - использовать расширение None
+       --РІСЂРµРјРµРЅРЅР°СЏ РїРѕРґРґРµСЂР¶РєР° РєР°Рє РїСѓСЃС‚РѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ. Р’ Р±СѓРґСѓС‰РµРј - РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СЂР°СЃС€РёСЂРµРЅРёРµ None
        Res=aDoc.CreateElement("boolean");
        txt=aDoc.CreateTextNode("0");
        Res.AppendChild(txt);
@@ -201,7 +201,7 @@ InClass Public
     elsif Lo(Node.nodeName)="boolean" then
        Result=(GetNodeValue(Node)="1");
     elsif Lo(Node.nodeName)="dateTime.iso8601" then
-       txt=GetNodeValue(Node);              --используя pos перестроить на обработку формата YYYY-MM-DDThh:mm:ss.sTZD http://www.w3.org/TR/NOTE-datetime
+       txt=GetNodeValue(Node);              --РёСЃРїРѕР»СЊР·СѓСЏ pos РїРµСЂРµСЃС‚СЂРѕРёС‚СЊ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ С„РѕСЂРјР°С‚Р° YYYY-MM-DDThh:mm:ss.sTZD http://www.w3.org/TR/NOTE-datetime
        if pos("T",txt)=1 then
           Result = nil;
          else
@@ -222,7 +222,7 @@ InClass Public
                 sub3=sub2.item(j-1).childNodes;
                 for k = 1..sub3.length do
                   if sub3.item(k-1).nodeType=1 then
-                     СИС2.Функции.AddInArray(aRes,FromXmlRpc(sub3.item(k-1)));
+                     РЎРРЎ2.Р¤СѓРЅРєС†РёРё.AddInArray(aRes,FromXmlRpc(sub3.item(k-1)));
                   end;
                 end;
               end;

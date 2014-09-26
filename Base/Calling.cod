@@ -1,17 +1,17 @@
-class "Структуры для вызова процедур ТБ из внешней программы";
+п»їclass "РЎС‚СЂСѓРєС‚СѓСЂС‹ РґР»СЏ РІС‹Р·РѕРІР° РїСЂРѕС†РµРґСѓСЂ РўР‘ РёР· РІРЅРµС€РЅРµР№ РїСЂРѕРіСЂР°РјРјС‹";
    import classes Conversion;
 inclass Public
   --/****if*  Calling/ParseReq
   --* SUMMARY
-  --* Разбирает XMLRPC запрос
+  --* Р Р°Р·Р±РёСЂР°РµС‚ XMLRPC Р·Р°РїСЂРѕСЃ
   --* SYNOPSIS
   func ParseReq(Request:String):Variant[];
   --* INPUTS
-  --* Request - XML-строка запроса в соответствии со спецификацией XMLRPC
+  --* Request - XML-СЃС‚СЂРѕРєР° Р·Р°РїСЂРѕСЃР° РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃРѕ СЃРїРµС†РёС„РёРєР°С†РёРµР№ XMLRPC
   --* OUTPUTS
-  --* Вывод является массивом из двух элементов:
-  --* * Первый элемент - имя метода
-  --* * Второй элемент - массив параметров
+  --* Р’С‹РІРѕРґ СЏРІР»СЏРµС‚СЃСЏ РјР°СЃСЃРёРІРѕРј РёР· РґРІСѓС… СЌР»РµРјРµРЅС‚РѕРІ:
+  --* * РџРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ - РёРјСЏ РјРµС‚РѕРґР°
+  --* * Р’С‚РѕСЂРѕР№ СЌР»РµРјРµРЅС‚ - РјР°СЃСЃРёРІ РїР°СЂР°РјРµС‚СЂРѕРІ
   --* SOURCE
   var Dom,root:AutoObject;
   var sub1,sub2:AutoObject;
@@ -30,8 +30,8 @@ inclass Public
             Params=[];
             sub2=sub1.item(i-1).getElementsByTagName("param");
             for j = 1..sub2.length do
-                 --                                          value      само содержимое
-                 СИС2.Функции.AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
+                 --                                          value      СЃР°РјРѕ СЃРѕРґРµСЂР¶РёРјРѕРµ
+                 РЎРРЎ2.Р¤СѓРЅРєС†РёРё.AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
             end;
         end;
     end;
@@ -40,14 +40,14 @@ inclass Public
   --****
   --/****if*  Calling/EncodeParams
   --* SUMMARY
-  --* Упаковывает массив параметров в XMLRPC
+  --* РЈРїР°РєРѕРІС‹РІР°РµС‚ РјР°СЃСЃРёРІ РїР°СЂР°РјРµС‚СЂРѕРІ РІ XMLRPC
   --* SYNOPSIS
   func EncodeParams(aDoc:AutoObject;Params:Variant[]):AutoObject;
   --* INPUTS
-  --* aDoc - Автообъект Msxml2.DomDocument в котором будут находиться элементы XML
-  --* Params - Массив параметров для упаковки
+  --* aDoc - РђРІС‚РѕРѕР±СЉРµРєС‚ Msxml2.DomDocument РІ РєРѕС‚РѕСЂРѕРј Р±СѓРґСѓС‚ РЅР°С…РѕРґРёС‚СЊСЃСЏ СЌР»РµРјРµРЅС‚С‹ XML
+  --* Params - РњР°СЃСЃРёРІ РїР°СЂР°РјРµС‚СЂРѕРІ РґР»СЏ СѓРїР°РєРѕРІРєРё
   --* OUTPUTS
-  --* Автообъект - узел XML(DomDocument) описывающий параметры по XMLRPC
+  --* РђРІС‚РѕРѕР±СЉРµРєС‚ - СѓР·РµР» XML(DomDocument) РѕРїРёСЃС‹РІР°СЋС‰РёР№ РїР°СЂР°РјРµС‚СЂС‹ РїРѕ XMLRPC
   --* SOURCE
   var sub1,sub2,sub3,sub4:AutoObject;
   var i:Integer;
@@ -65,15 +65,15 @@ inclass Public
   --****
   --/****if*  Calling/EncodeFault
   --* SUMMARY
-  --* Упаковывает ошибку в XMLRPC
+  --* РЈРїР°РєРѕРІС‹РІР°РµС‚ РѕС€РёР±РєСѓ РІ XMLRPC
   --* SYNOPSIS 
   func EncodeFault(aDoc:AutoObject;code:Integer;text:String):AutoObject;
   --* INPUTS
-  --* aDoc - Автообъект Msxml2.DomDocument в котором будут находится элементы XML
-  --* code - Код ошибки
-  --* text - Текстовое описание ошибки
+  --* aDoc - РђРІС‚РѕРѕР±СЉРµРєС‚ Msxml2.DomDocument РІ РєРѕС‚РѕСЂРѕРј Р±СѓРґСѓС‚ РЅР°С…РѕРґРёС‚СЃСЏ СЌР»РµРјРµРЅС‚С‹ XML
+  --* code - РљРѕРґ РѕС€РёР±РєРё
+  --* text - РўРµРєСЃС‚РѕРІРѕРµ РѕРїРёСЃР°РЅРёРµ РѕС€РёР±РєРё
   --* OUTPUTS
-  --* Автообъект - узел XML(DomDocument) описывающий ошибку по XMLRPC
+  --* РђРІС‚РѕРѕР±СЉРµРєС‚ - СѓР·РµР» XML(DomDocument) РѕРїРёСЃС‹РІР°СЋС‰РёР№ РѕС€РёР±РєСѓ РїРѕ XMLRPC
   --* SOURCE
   var Err:Storage;
   var sub1,sub2,sub3:AutoObject;
@@ -90,13 +90,13 @@ inclass Public
   --****
   --/****f*  Calling/Caller
   --* SUMMARY
-  --* Реализует сервер вызова XMLRPC
+  --* Р РµР°Р»РёР·СѓРµС‚ СЃРµСЂРІРµСЂ РІС‹Р·РѕРІР° XMLRPC
   --* SYNOPSIS 
   func Caller(Request:string):string;
   --* INPUTS
-  --* Строка запроса XMLRPC
+  --* РЎС‚СЂРѕРєР° Р·Р°РїСЂРѕСЃР° XMLRPC
   --* OUTPUTS
-  --* Строка ответа XMLRPC
+  --* РЎС‚СЂРѕРєР° РѕС‚РІРµС‚Р° XMLRPC
   --* SOURCE
   var ParseRes:Variant[];
   var target:ClassMeth;

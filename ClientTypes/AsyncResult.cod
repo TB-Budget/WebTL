@@ -1,4 +1,4 @@
-class "Отложенный результат выполнения";
+п»їclass "РћС‚Р»РѕР¶РµРЅРЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚ РІС‹РїРѕР»РЅРµРЅРёСЏ";
 
 inclass
   func RestAsync(URL:String; Mapper:XMLMapper; Method:String = "GET"):AsyncResult;
@@ -12,9 +12,9 @@ inclass
 
   func XMLRPCAsync(URL:string; Method:string; Params:Variant[]; MultiRes:Logical=True):AsyncResult;
   --* INPUTS
-  --* URL - адрес сервера XMLRPC
-  --* Method - название вызываемого метода
-  --* Params - список параметров
+  --* URL - Р°РґСЂРµСЃ СЃРµСЂРІРµСЂР° XMLRPC
+  --* Method - РЅР°Р·РІР°РЅРёРµ РІС‹Р·С‹РІР°РµРјРѕРіРѕ РјРµС‚РѕРґР°
+  --* Params - СЃРїРёСЃРѕРє РїР°СЂР°РјРµС‚СЂРѕРІ
     var xReq:AutoObject;
     Result = Create;
     Result.request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
@@ -40,14 +40,14 @@ inclass
   end;
 
 inobject
-  request: AutoObject; --XMLHTTPRequest текущего запроса
-  mapper: Variant; --XMLMapper для REST-XML
-                   --0; 1 - XML-RPC (0 - массив результатов, 1 - первый)
-  id: String; --кеш для сверки
-  postprocess: ClassMeth; --Дополнительная обработка результата
+  request: AutoObject; --XMLHTTPRequest С‚РµРєСѓС‰РµРіРѕ Р·Р°РїСЂРѕСЃР°
+  mapper: Variant; --XMLMapper РґР»СЏ REST-XML
+                   --0; 1 - XML-RPC (0 - РјР°СЃСЃРёРІ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ, 1 - РїРµСЂРІС‹Р№)
+  id: String; --РєРµС€ РґР»СЏ СЃРІРµСЂРєРё
+  postprocess: ClassMeth; --Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РѕР±СЂР°Р±РѕС‚РєР° СЂРµР·СѓР»СЊС‚Р°С‚Р°
 
-  cb_obj: Object;  --Объект обратного вызова
-  cb_func: String;  --Вызываемый метод с 1 аргументом типа результата
+  cb_obj: Object;  --РћР±СЉРµРєС‚ РѕР±СЂР°С‚РЅРѕРіРѕ РІС‹Р·РѕРІР°
+  cb_func: String;  --Р’С‹Р·С‹РІР°РµРјС‹Р№ РјРµС‚РѕРґ СЃ 1 Р°СЂРіСѓРјРµРЅС‚РѕРј С‚РёРїР° СЂРµР·СѓР»СЊС‚Р°С‚Р°
   timer1: Timer;
 
   func Equal(ob:AsyncResult):Logical;
@@ -68,7 +68,7 @@ inobject
   proc Poll(T:Timer =nil);
     var cb_info:MethodInfo;
     if ready then
-       cb_info = СИС2.ФункцииРТТИ.ПолучитьИнфоМетода(cb_obj.ClassType, cb_func);
+       cb_info = РЎРРЎ2.Р¤СѓРЅРєС†РёРёР РўРўР.РџРѕР»СѓС‡РёС‚СЊРРЅС„РѕРњРµС‚РѕРґР°(cb_obj.ClassType, cb_func);
        if cb_info.Kind = 2 then --MethodInfo.MethodKind("mkFunc") then
           cb_info.CallFunc(self.cb_obj, self.Get);
        elsif cb_info.Kind = 1 then --MethodInfo.MethodKind("mkProc") then
@@ -85,14 +85,14 @@ inobject
 
   func Get:Variant;
     var xRes: AutoObject;
-    --Проверяем готовность или дожидаемся ее
+    --РџСЂРѕРІРµСЂСЏРµРј РіРѕС‚РѕРІРЅРѕСЃС‚СЊ РёР»Рё РґРѕР¶РёРґР°РµРјСЃСЏ РµРµ
     while not ready do
       --sleep(1);
       UIWait.ExecuteDialog;
     od;
-    --Если было включено автоопрашивание - отключаем;
+    --Р•СЃР»Рё Р±С‹Р»Рѕ РІРєР»СЋС‡РµРЅРѕ Р°РІС‚РѕРѕРїСЂР°С€РёРІР°РЅРёРµ - РѕС‚РєР»СЋС‡Р°РµРј;
     self.timer1.active = false;
-    -- Парсим результат в зависимости от типа запроса
+    -- РџР°СЂСЃРёРј СЂРµР·СѓР»СЊС‚Р°С‚ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° Р·Р°РїСЂРѕСЃР°
     if mapper is XMLMapper then
       xRes = request.responseXML;
       Result = mapper.ParseNode(xRes.documentElement);

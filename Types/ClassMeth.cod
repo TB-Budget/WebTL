@@ -1,5 +1,5 @@
-class  'Метод класса как экземпляр функции';
-  Import СИС2 Classes оперСистемные;
+п»їclass  'РњРµС‚РѕРґ РєР»Р°СЃСЃР° РєР°Рє СЌРєР·РµРјРїР»СЏСЂ С„СѓРЅРєС†РёРё';
+  Import РЎРРЎ2 Classes РѕРїРµСЂРЎРёСЃС‚РµРјРЅС‹Рµ;
 
 InClass Public
   func CreateEx(aMethodName :String):ClassMeth;
@@ -12,28 +12,28 @@ InObject Private
   myMeth:MethodInfo;
 
 InObject Public
-  proc Загрузить synonym Load(aClass:Class;aMeth:MethodInfo);
+  proc Р—Р°РіСЂСѓР·РёС‚СЊ synonym Load(aClass:Class;aMeth:MethodInfo);
     myClass=aClass;
     myMeth=aMeth;
   end;
 
-  proc ИзСтроки synonym FromString(aMethodName :String);
+  proc РР·РЎС‚СЂРѕРєРё synonym FromString(aMethodName :String);
   var i:Integer;
   var sCl,sMe:String;
     i = WordsCount(aMethodName, '.');
     sMe = ExtractWord(aMethodName, i, '.');
     sCl = SubStr(aMethodName, 1, Length(aMethodName) - Length(sMe) - 1);
     if sCl = '' then 
-      SetError(0,"Метод не найден, проверьте задание имени класса");
+      SetError(0,"РњРµС‚РѕРґ РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРІРµСЂСЊС‚Рµ Р·Р°РґР°РЅРёРµ РёРјРµРЅРё РєР»Р°СЃСЃР°");
     end;
     myClass  = FindClass(sCl);
     if myClass = nil then
-       SetError(0,"Класс "+sCl+" не найден");
+       SetError(0,"РљР»Р°СЃСЃ "+sCl+" РЅРµ РЅР°Р№РґРµРЅ");
     end;
-    myMeth = ПолучитьИнфоМетода(myClass, sMe);
+    myMeth = РџРѕР»СѓС‡РёС‚СЊРРЅС„РѕРњРµС‚РѕРґР°(myClass, sMe);
   end;
 
-  func Вызвать synonym Call(Params:Variant[]):Variant;
+  func Р’С‹Р·РІР°С‚СЊ synonym Call(Params:Variant[]):Variant;
     if myMeth.Kind=2 then--MethodInfo.MethodKind("mkFunc") then
        Result=myMeth.CallFuncEx(myClass,Params);
     elsif myMeth.Kind=1 then--MethodInfo.MethodKind("mkProc") then
@@ -45,7 +45,7 @@ InObject Public
          raise;
        end;
     else
-      SetError(0,"Метод не является процедурой или функцией");
+      SetError(0,"РњРµС‚РѕРґ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРѕС†РµРґСѓСЂРѕР№ РёР»Рё С„СѓРЅРєС†РёРµР№");
       Result=False;
     end;
   end;

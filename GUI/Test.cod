@@ -1,4 +1,4 @@
-class "Test";
+п»їclass "Test";
   import Classes Conversion;
   import Classes Calling;
   import Classes Client;
@@ -17,11 +17,11 @@ var filter_by:TemplateSection;
 var Key:String[];
 var Value:String[];
 --------------------------------------------------------------------------------
---{ Обработчики событий бланка
+--{ РћР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№ Р±Р»Р°РЅРєР°
 
   proc Button1OnClick(Sender :Button);
   var doc,root:AutoObject;
-  var testSt:Storage;
+  --var testSt:Storage;
   doc=AutoObject.Create("Msxml2.DOMDocument.6.0");
   doc.Async=False;
   doc.loadXML('<?xml version="1.0" encoding="windows-1251"?>');

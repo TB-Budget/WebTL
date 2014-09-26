@@ -1,8 +1,8 @@
-class  'Примеры типов ТБ для тестов';
+п»їclass  'РџСЂРёРјРµСЂС‹ С‚РёРїРѕРІ РўР‘ РґР»СЏ С‚РµСЃС‚РѕРІ';
 
 InClass Public
   var tInt:Integer=7206781;
-  var tStr:String="Это тест";
+  var tStr:String="Р­С‚Рѕ С‚РµСЃС‚";
   var tLog:Logical=True;
   var tNum:Numeric=321.67;
   var tDat:Date=CreateDate(17,05,1985,1,15,02);

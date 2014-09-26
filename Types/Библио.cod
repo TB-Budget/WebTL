@@ -1,4 +1,4 @@
-class "Библиотека непрофильных функций";
+п»їclass "Р‘РёР±Р»РёРѕС‚РµРєР° РЅРµРїСЂРѕС„РёР»СЊРЅС‹С… С„СѓРЅРєС†РёР№";
 
 inclass
   func Filter(predicate: String; const InArray:Object[]):Object[];
@@ -9,7 +9,7 @@ inclass
     for i = 1 .. ii do
       if InArray[i].Evaluate(predicate) then
         OutArray[j] = InArray[i];
-        j = j + 1;  --это быстрее чем каждый раз вычислять длину OutArray;
+        j = j + 1;  --СЌС‚Рѕ Р±С‹СЃС‚СЂРµРµ С‡РµРј РєР°Р¶РґС‹Р№ СЂР°Р· РІС‹С‡РёСЃР»СЏС‚СЊ РґР»РёРЅСѓ OutArray;
       end;
     end;
     Result = OutArray;
@@ -27,7 +27,7 @@ inclass
       one.elem = InArray[i];
       if one.Evaluate(predicate) then
         OutArray[j] = InArray[i];
-        j = j + 1;  --это быстрее чем каждый раз вычислять длину OutArray;
+        j = j + 1;  --СЌС‚Рѕ Р±С‹СЃС‚СЂРµРµ С‡РµРј РєР°Р¶РґС‹Р№ СЂР°Р· РІС‹С‡РёСЃР»СЏС‚СЊ РґР»РёРЅСѓ OutArray;
       end;
     end;
     Result = OutArray;

@@ -1,20 +1,20 @@
-class  'Полезные функции';
-   import СИС2 Classes Web.Utils;
+п»їclass  'РџРѕР»РµР·РЅС‹Рµ С„СѓРЅРєС†РёРё';
+   import РЎРРЎ2 Classes Web.Utils;
 
 InClass Public
 
 --   Function: GetRowData
 --
---   Возвращает даные строки в виде хранилища
+--   Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅС‹Рµ СЃС‚СЂРѕРєРё РІ РІРёРґРµ С…СЂР°РЅРёР»РёС‰Р°
 --
 --   Parameters:
 --
---      Data - Объект строки(записи)
---      FetchIntrenal - Извлекать ли служебные поля
+--      Data - РћР±СЉРµРєС‚ СЃС‚СЂРѕРєРё(Р·Р°РїРёСЃРё)
+--      FetchIntrenal - РР·РІР»РµРєР°С‚СЊ Р»Рё СЃР»СѓР¶РµР±РЅС‹Рµ РїРѕР»СЏ
 --
 --   Returns:
 --
---      Хранилище объектов
+--      РҐСЂР°РЅРёР»РёС‰Рµ РѕР±СЉРµРєС‚РѕРІ
 --
 --   See Also:
 --
@@ -27,7 +27,7 @@ InClass Public
    var MustIgnore:String[];
    var Value:Variant;
    var VClassI:ClassInfo;
-     MustIgnore=["ТипКласса","ClassType","НовыйКлючЗаписи","НовыйКлючДокумента","NewDocID"];
+     MustIgnore=["РўРёРїРљР»Р°СЃСЃР°","ClassType","РќРѕРІС‹Р№РљР»СЋС‡Р—Р°РїРёСЃРё","РќРѕРІС‹Р№РљР»СЋС‡Р”РѕРєСѓРјРµРЅС‚Р°","NewDocID"];
      RecInfo=Data.ClassInfo;
      Result = Storage.Create;
      nn=RecInfo.MembersCount;
@@ -67,12 +67,6 @@ InClass Public
 
    func GetRecordData(RecordKey:String; FetchIntrenal:Logical=False):Storage;
    var Rec:Document;
-   var RecInfo:RecordClassInfo;
-   var Member:MethodInfo;
-   var n,nn:Integer;
-   var MustIgnore:String[];
-   var Value:Variant;
-   var VClassI:ClassInfo;
      if Substr(recordKey,1,1)<>"{" then
         recordKey="{"+Recordkey+"}";
      end;

@@ -1,17 +1,17 @@
-class "Реализация вызовов XML-RPC из Турбо 9";
+п»їclass "Р РµР°Р»РёР·Р°С†РёСЏ РІС‹Р·РѕРІРѕРІ XML-RPC РёР· РўСѓСЂР±Рѕ 9";
     import classes Conversion;
     import classes Calling;
 inclass Public
   --/****if*  Client/EncodeRequest
   --* SUMMARY
-  --* Формирует строку XMLRPC запроса
+  --* Р¤РѕСЂРјРёСЂСѓРµС‚ СЃС‚СЂРѕРєСѓ XMLRPC Р·Р°РїСЂРѕСЃР°
   --* SYNOPSIS
   func EncodeRequest(Method:string;Params:Variant[]):AutoObject;
   --* INPUTS
-  --* Method - название вызываемого метода
-  --* Params - список параметров
+  --* Method - РЅР°Р·РІР°РЅРёРµ РІС‹Р·С‹РІР°РµРјРѕРіРѕ РјРµС‚РѕРґР°
+  --* Params - СЃРїРёСЃРѕРє РїР°СЂР°РјРµС‚СЂРѕРІ
   --* OUTPUTS
-  --* Текстовое представление запроса в формате XMLRC
+  --* РўРµРєСЃС‚РѕРІРѕРµ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ Р·Р°РїСЂРѕСЃР° РІ С„РѕСЂРјР°С‚Рµ XMLRC
   --* SOURCE
   var root,sub1,sub2,hdr,xReq:AutoObject;
     xReq=AutoObject.Create("Msxml2.DOMDocument.6.0");
@@ -38,13 +38,13 @@ inclass Public
   --****
   --/****if*  Client/ParseResp
   --* SUMMARY
-  --* Разбирает пришедший ответ
+  --* Р Р°Р·Р±РёСЂР°РµС‚ РїСЂРёС€РµРґС€РёР№ РѕС‚РІРµС‚
   --* SYNOPSIS
   func ParseResp(Response:AutoObject):Variant[];
   --* INPUTS
-  --* Response - автообъект с ответом
+  --* Response - Р°РІС‚РѕРѕР±СЉРµРєС‚ СЃ РѕС‚РІРµС‚РѕРј
   --* OUTPUTS
-  --* Результат выполнения
+  --* Р РµР·СѓР»СЊС‚Р°С‚ РІС‹РїРѕР»РЅРµРЅРёСЏ
   --* SOURCE
   var root:AutoObject;
   var sub1,sub2:AutoObject;
@@ -58,11 +58,11 @@ inclass Public
             Params=[];
             sub2=sub1.item(i-1).getElementsByTagName("param");
             for j = 1..sub2.length do
-                 --                                          value      само содержимое
-                 СИС2.Функции.AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
+                 --                                          value      СЃР°РјРѕ СЃРѕРґРµСЂР¶РёРјРѕРµ
+                 РЎРРЎ2.Р¤СѓРЅРєС†РёРё.AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
             end;
         elsif Lo(sub1.item(i-1).nodeName)="fault" then
-         --ОБРАБОТКА ОШИБОК
+         --РћР‘Р РђР‘РћРўРљРђ РћРЁРР‘РћРљ
          --                              value
          res = FromXmlRpc(sub1.item(i-1).firstChild.firstChild);
          SetError(res.faultCode, res.faultString);
@@ -76,15 +76,15 @@ inclass Public
 
   --/****if*  Client/SimpleCall
   --* SUMMARY
-  --* Выполняет XMLRPC вызов на удаленном сервере
+  --* Р’С‹РїРѕР»РЅСЏРµС‚ XMLRPC РІС‹Р·РѕРІ РЅР° СѓРґР°Р»РµРЅРЅРѕРј СЃРµСЂРІРµСЂРµ
   --* SYNOPSIS
   func SimpleCall(URL:string;Method:string;Params:Variant[]):Variant[];
   --* INPUTS
-  --* URL - адрес сервера XMLRPC
-  --* Method - название вызываемого метода
-  --* Params - список параметров
+  --* URL - Р°РґСЂРµСЃ СЃРµСЂРІРµСЂР° XMLRPC
+  --* Method - РЅР°Р·РІР°РЅРёРµ РІС‹Р·С‹РІР°РµРјРѕРіРѕ РјРµС‚РѕРґР°
+  --* Params - СЃРїРёСЃРѕРє РїР°СЂР°РјРµС‚СЂРѕРІ
   --* OUTPUTS
-  --* Результат выполнения
+  --* Р РµР·СѓР»СЊС‚Р°С‚ РІС‹РїРѕР»РЅРµРЅРёСЏ
   --* SOURCE
   var Res:Variant[];
   var xRes:AutoObject;

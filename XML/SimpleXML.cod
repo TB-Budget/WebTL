@@ -1,4 +1,4 @@
-class "Простейшее формирование XML";
+п»їclass "РџСЂРѕСЃС‚РµР№С€РµРµ С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ XML";
 inclass public
   func EasyStrorage(src: String):Storage;
   -- Key1=Value1#Key2=Value2
@@ -15,14 +15,14 @@ inclass public
   end;
 
 inobject private
-  Data[]:String; --Набор данных XML. Массив используется для добавления в конец без переприсвоения
-  Depth[]:String; --Список открытых тэгов. FIFO-буфер для закрытия тэгов.
+  Data[]:String; --РќР°Р±РѕСЂ РґР°РЅРЅС‹С… XML. РњР°СЃСЃРёРІ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ РІ РєРѕРЅРµС† Р±РµР· РїРµСЂРµРїСЂРёСЃРІРѕРµРЅРёСЏ
+  Depth[]:String; --РЎРїРёСЃРѕРє РѕС‚РєСЂС‹С‚С‹С… С‚СЌРіРѕРІ. FIFO-Р±СѓС„РµСЂ РґР»СЏ Р·Р°РєСЂС‹С‚РёСЏ С‚СЌРіРѕРІ.
 inobject public
-  proc ВРез synonym ToRes(more: String);
-     Сис2.Функции.AddInArray(Data, more);
+  proc Р’Р РµР· synonym ToRes(more: String);
+     РЎРёСЃ2.Р¤СѓРЅРєС†РёРё.AddInArray(Data, more);
   end;
 
-  proc ОткрытьТэг synonym OpenTag(Name: String; Attrib: Storage);
+  proc РћС‚РєСЂС‹С‚СЊРўСЌРі synonym OpenTag(Name: String; Attrib: Storage);
     var I:Integer;
     ToRes("<" + Name);
     for i = 1..Attrib.Count do
@@ -33,7 +33,7 @@ inobject public
     InsertInArray(Depth, 1, Name);
   end;
 
-  func ЗакрытьТэг synonym CloseTag: String;
+  func Р—Р°РєСЂС‹С‚СЊРўСЌРі synonym CloseTag: String;
     var Name:String;
     Name = Depth[1];
     DeleteFromArray(Depth,1);
@@ -41,7 +41,7 @@ inobject public
     Result = Name;
   end;
 
-  proc СоздатьТэг synonym CreateTag(Name: String; Content: String; Attrib: Storage);
+  proc РЎРѕР·РґР°С‚СЊРўСЌРі synonym CreateTag(Name: String; Content: String; Attrib: Storage);
      OpenTag(Name, Attrib);
      ToRes(Content);
      CloseTag;
