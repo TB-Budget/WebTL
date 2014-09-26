@@ -201,8 +201,12 @@ InClass Public
     elsif Lo(Node.nodeName)="boolean" then
        Result=(GetNodeValue(Node)="1");
     elsif Lo(Node.nodeName)="dateTime.iso8601" then
-       txt=GetNodeValue(Node);
-       Result=CreateDate(Int(Substr(txt,7,2)),Int(Substr(txt,5,2)),Int(Substr(txt,1,4)),Int(Substr(txt,10,2)),Int(Substr(txt,13,2)),Int(Substr(txt,16,2)));
+       txt=GetNodeValue(Node);              --используя pos перестроить на обработку формата YYYY-MM-DDThh:mm:ss.sTZD http://www.w3.org/TR/NOTE-datetime
+       if pos("T",txt)=1 then
+          Result = nil;
+         else
+          Result=CreateDate(Int(Substr(txt,7,2)),Int(Substr(txt,5,2)),Int(Substr(txt,1,4)),Int(Substr(txt,10,2)),Int(Substr(txt,13,2)),Int(Substr(txt,16,2)));
+       end;
     elsif Lo(Node.nodeName)="base64" then
        bVar=BinaryObject.Create;
        bVar.AsString=Decode64(GetNodeValue(Node));
