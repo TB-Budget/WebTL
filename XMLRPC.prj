@@ -9,7 +9,8 @@
     <Group Name="Types" Type="Classes" Disabled="False"/>
     <Group Name="Base" Type="Classes" Disabled="False"/>
     <Group Name="XML" Type="Classes" Disabled="False"/>
-    <Group Name="Test" Type="Blanks" Disabled="False"/>
+    <Group Name="GUI" Type="Blanks" Disabled="False"/>
     <Group Name="Utility" Type="Classes" Disabled="False"/>
+    <Group Name="СервРасч" Type="Classes" Disabled="False"/>
   </Groups>
 </Project>
