@@ -116,6 +116,15 @@ inclass Public
     --hReq.send(xReq);
     hReq.send(xReq.xml);
     xRes=hReq.responseXML;
+    if xRes = nil or xRes.documentElement = nil then
+      try
+        xRes = AutoObject.Create("Msxml2.DOMDocument.6.0");
+        xRes.Async = False;
+        xRes.loadXML(hReq.responseText);
+      except
+        SetError(502,'Ошибка удаленного вызова процедуры');
+      end;
+    end;
 --    tf = TextFile.Create('r:\text.xml',fmCreate);
 --    tf.write(hReq.responseText);
 --    tf.Flush;
