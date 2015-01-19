@@ -148,9 +148,6 @@ InClass Public
        Res=aDoc.CreateElement("array");
        sub1=aDoc.CreateElement("data");
        Res.AppendChild(sub1);
-       sub2=aDoc.CreateElement("value");
-       sub1.AppendChild(sub2);
-
        for i = 1..LengthOfArray(arr) do
          sub2=aDoc.CreateElement("value");
          sub1.AppendChild(sub2);
