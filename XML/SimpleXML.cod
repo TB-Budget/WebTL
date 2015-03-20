@@ -39,14 +39,14 @@ inobject public
   end;
 
   Proc ВРезЭкран synonym ToResScreen(more: String);
-  var l:i;
+  var l: integer;
   --кавычки
   l = Pos('"', more);
   if l <> 0:
     ToResScreen(Substr(more, 1, l - 1));
     ToRes("&quot;");
     ToResScreen(Substr(more, l + 1, 255));
-    Exit;
+    Return;
   fi;
   --апостроф
   l = Pos("'", more);
@@ -54,7 +54,7 @@ inobject public
     ToResScreen(Substr(more, 1, l - 1));
     ToRes("&apos;");
     ToResScreen(Substr(more, l + 1, 255));
-    Exit;
+    Return;
   fi;
   --амперсенд
   l = Pos("&", more);
@@ -62,7 +62,7 @@ inobject public
     ToResScreen(Substr(more, 1, l - 1));
     ToRes("&amp;");
     ToResScreen(Substr(more, l + 1, 255));
-    Exit;
+    Return;
   fi;
   --меньше
   l = Pos('<', more);
@@ -70,7 +70,7 @@ inobject public
     ToResScreen(Substr(more, 1, l - 1));
     ToRes("&lt;");
     ToResScreen(Substr(more, l + 1, 255));
-    Exit;
+    Return;
   fi;
   --больше
   l = Pos('>', more);
@@ -78,7 +78,7 @@ inobject public
     ToResScreen(Substr(more, 1, l - 1));
     ToRes("&gt;");
     ToResScreen(Substr(more, l + 1, 255));
-    Exit;
+    Return;
   fi;
   --Все проверки прошли - добавляем неэкранированно
   ToRes(more);
@@ -89,7 +89,7 @@ inobject public
     ToRes("<" + Name);
     for i = 1..Attrib.Count do
        ToRes(" " + Attrib.IndexByNumber[i] + "='");
-       ToResScreen(Str(Attrib.ItemsByNumber[i]);
+       ToResScreen(Str(Attrib.ItemsByNumber[i]));
        ToRes("'");
     end;
     ToRes(">");
@@ -111,7 +111,7 @@ inobject public
   end;
 
   func ОднойСтрокой synonym OneString(Encoding: String='windows-1251'): String;
-  -- Представление набранного XML качестве сроки, прописав кодировку в заголовок
+  -- Представление набранного XML качестве строки, прописав кодировку в заголовок
   -- !!! Истинная кодировка символов остается 1251!!!
     var i, ii: Integer;
     Result = '<?xml version="1.0" encoding="'+encoding+'"?>'+chr(10);
