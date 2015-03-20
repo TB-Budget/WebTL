@@ -38,12 +38,59 @@ inobject public
      Сис2.Функции.AddInArray(Data, more);
   end;
 
+  Proc ВРезЭкран synonym ToResScreen(more: String);
+  var l:i;
+  --кавычки
+  l = Pos('"', more);
+  if l <> 0:
+    ToResScreen(Substr(more, 1, l - 1));
+    ToRes("&quot;");
+    ToResScreen(Substr(more, l + 1, 255));
+    Exit;
+  fi;
+  --апостроф
+  l = Pos("'", more);
+  if l <> 0:
+    ToResScreen(Substr(more, 1, l - 1));
+    ToRes("&apos;");
+    ToResScreen(Substr(more, l + 1, 255));
+    Exit;
+  fi;
+  --амперсенд
+  l = Pos("&", more);
+  if l <> 0:
+    ToResScreen(Substr(more, 1, l - 1));
+    ToRes("&amp;");
+    ToResScreen(Substr(more, l + 1, 255));
+    Exit;
+  fi;
+  --меньше
+  l = Pos('<', more);
+  if l <> 0:
+    ToResScreen(Substr(more, 1, l - 1));
+    ToRes("&lt;");
+    ToResScreen(Substr(more, l + 1, 255));
+    Exit;
+  fi;
+  --больше
+  l = Pos('>', more);
+  if l <> 0:
+    ToResScreen(Substr(more, 1, l - 1));
+    ToRes("&gt;");
+    ToResScreen(Substr(more, l + 1, 255));
+    Exit;
+  fi;
+  --Все проверки прошли - добавляем неэкранированно
+  ToRes(more);
+  end;
+
   proc ОткрытьТэг synonym OpenTag(Name: String; Attrib: Storage);
     var I:Integer;
     ToRes("<" + Name);
     for i = 1..Attrib.Count do
        ToRes(" " + Attrib.IndexByNumber[i] + "='");
-       ToRes(Str(Attrib.ItemsByNumber[i]) + "'");
+       ToResScreen(Str(Attrib.ItemsByNumber[i]);
+       ToRes("'");
     end;
     ToRes(">");
     InsertInArray(Depth, 1, Name);
@@ -59,7 +106,7 @@ inobject public
 
   proc СоздатьТэг synonym CreateTag(Name: String; Content: String; Attrib: Storage);
      OpenTag(Name, Attrib);
-     ToRes(Content);
+     ToResScreen(Content);
      CloseTag;
   end;
 
@@ -77,10 +124,6 @@ inobject public
   proc ВФайл synonym ToFile(Path: String; Encoding:String='');
     var F: TextFile;
     var Fenc: TextFile.Encodings;
-    if Encoding = '' or Encoding = 'win1251' or Encoding = '1251':
-       Encoding = 'windows-1251';
-       Fenc = TextFile.ANSI;
-    fi;
     if Encoding = '' or Encoding = 'win1251' or Encoding = '1251':
        Encoding = 'windows-1251';
        Fenc = TextFile.ANSI;
