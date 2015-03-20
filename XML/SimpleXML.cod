@@ -63,4 +63,43 @@ inobject public
      CloseTag;
   end;
 
+  func ОднойСтрокой synonym OneString(Encoding: String='windows-1251'): String;
+  -- Представление набранного XML качестве сроки, прописав кодировку в заголовок
+  -- !!! Истинная кодировка символов остается 1251!!!
+    var i, ii: Integer;
+    Result = '<?xml version="1.0" encoding="'+encoding+'"?>'+chr(10);
+    ii = LengthOfArray(self.Data);
+    for i = 1..ii do
+      Result = Result + self.Data[i];
+    end;
+  end;
+
+  proc ВФайл synonym ToFile(Path: String; Encoding:String='');
+    var F: TextFile;
+    var Fenc: TextFile.Encodings;
+    if Encoding = '' or Encoding = 'win1251' or Encoding = '1251':
+       Encoding = 'windows-1251';
+       Fenc = TextFile.ANSI;
+    fi;
+    if Encoding = '' or Encoding = 'win1251' or Encoding = '1251':
+       Encoding = 'windows-1251';
+       Fenc = TextFile.ANSI;
+    fi;
+    if Encoding = 'UTF-8' then
+       Fenc = TextFile.UTF8;
+    end;
+
+    if Fenc = TextFile.UTF8 then
+       -- Формируем заголововок с BOM
+      F = TextFile.Create(Path, fmCreate, TextFile.Binary);
+      F.Write(chr(0xEF) + chr(0xBB) + chr(0xBF));  -- UTF8
+      F.Flush;
+      F = Textfile.Create(Path, fmOpenReadWrite, Fenc);
+    else
+      F = Textfile.Create(Path, fmCreate, Fenc);
+    end;
+
+    F.Write(self.OneString(Encoding));
+    F.Flush;
+  end;
 end
