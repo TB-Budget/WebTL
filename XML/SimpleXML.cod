@@ -119,6 +119,7 @@ inobject public
     Result = '<?xml version="1.0" encoding="'+encoding+'"?>'+chr(10);
     ii = LengthOfArray(self.Data);
     for i = 1..ii do
+      Hint('Запись файла...', i, ii);
       Result = Result + self.Data[i];
     end;
   end;
