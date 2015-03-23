@@ -87,11 +87,13 @@ inobject public
   proc ОткрытьТэг synonym OpenTag(Name: String; Attrib: Storage);
     var I:Integer;
     ToRes("<" + Name);
-    for i = 1..Attrib.Count do
-       ToRes(" " + Attrib.IndexByNumber[i] + "='");
-       ToResScreen(Str(Attrib.ItemsByNumber[i]));
-       ToRes("'");
-    end;
+    if Attrib <> nil:
+      for i = 1..Attrib.Count do
+         ToRes(" " + Attrib.IndexByNumber[i] + "='");
+         ToResScreen(Str(Attrib.ItemsByNumber[i]));
+         ToRes("'");
+      od;
+    fi;
     ToRes(">");
     InsertInArray(Depth, 1, Name);
   end;
