@@ -30,6 +30,16 @@ inclass public
     Result = myStorage;
   end;
 
+  func ScreenStr(src: String): String;
+  var tmp: SimpleXML;
+  var i, ii: Integer;
+    tmp = Create;
+    tmp.ToResScreen(src);
+    for i = 1..ii do
+      Result = Result + tmp.Data[i];
+    end;
+  end;
+
 inobject private
   Data[]:String; --Набор данных XML. Массив используется для добавления в конец без переприсвоения
   Depth[]:String; --Список открытых тэгов. FIFO-буфер для закрытия тэгов.
