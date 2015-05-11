@@ -16,7 +16,17 @@
 
 class "Сопоставитель XML с объектами Турбо9";
 inclass
-
+--  func ParseXSD(file): Variant[];
+--  -- первый элемент - неймспейс
+--  -- второй элемент - хранилище ключ - имя типа, значение - тип
+--    var xScheme:AutoObject;
+--    xScheme = AutoObject.Create("Msxml2.DOMDocument.6.0");
+--    xScheme.Async = False;
+--    xScheme.load(file);
+--
+--
+--  end;
+  --CreateByXSD(file, namespace, xmltype);
 inobject
   var namespace: String; --Пространство имен для типа XML (опционально)
   var xmltype: String; --Имя типа XML (если есть)
@@ -26,39 +36,6 @@ inobject
                                 --Для загрузки это требует типа Storage и все значения будут строками
                                 --                                      массивы не допускаются
                                 --При выгрузке это генерирует элементы по именам полей
-
-  func LoadNodeValue(Node:AutoObject; nodetype:Variant):variant;
-    var tmpS:String;
-
-    if varType(nodetype) = 2 then
-      --Простые типы
-      --varString  :Integer = 1;  -- строка
-      if nodetype = 1 then
-         Result = Node.text;
-      --varInt     :Integer = 2;  -- 4-байтовое целое
-      elsif nodetype = 2 then
-         Result =  Int(Node.text);
-      --varNumeric :Integer = 3;  -- Число с плавающей точкой
-      elsif nodetype = 3 then
-         --TODO: Экспоненциальный формат
-         Result =  Num(Node.text);
-     --varLogical :Integer = 4;  -- Логическое (булево) значение
-      elsif nodetype = 4 then
-         tmpS =  Node.text;
-         if tmpS = nil or tmpS = '0' or Lo(tmpS)='false' or Lo(tmpS)='ложь' then
-            Result = False;
-         else
-            Result = True;
-         end;
-      --varDate    :Integer = 5;  -- ДатаВремя в формате TDateTime
-      end;
-    elsif varType(nodetype) = 6:
-      --Объектные типы
-      if nodetype.Classtype = XMLMapper then
-         Result = nodetype.ParseNode(Node);
-      end;
-    end;
-  end;
 
   func GetNodeField(Node:AutoObject; Nodedesc:MapperNode):Variant;
     -- Здесь перебираем узлы
@@ -72,7 +49,7 @@ inobject
        if (sub1.item(i).nodeName = Nodedesc.nodename and sub1.item(i).nodeType =  Nodedesc.nodekind) or
           (Nodedesc.nodekind = 3 and sub1.item(i).nodeType =  Nodedesc.nodekind) then
           --Загружаем узел
-          res_ = LoadNodeValue(sub1.item(i), nodedesc.nodetype);
+          res_ = nodedesc.LoadNodeValue(sub1.item(i));
           --Удаляем узел
           Node.removeChild(sub1.item(i));
           --Сохраняем значение
@@ -93,7 +70,7 @@ inobject
       While i < sub1.length do
          if sub1.item(i).nodeName = Nodedesc.nodename and sub1.item(i).nodeType =  Nodedesc.nodekind then
             --Загружаем узел
-            res_ = LoadNodeValue(sub1.item(i), nodedesc.nodetype);
+            res_ = nodedesc.LoadNodeValue(sub1.item(i));
             --Узел удалять не надо - атрибуты уникальны.
             --Сохраняем значение
             if Nodedesc.repeatable then
@@ -134,7 +111,7 @@ inobject
         val = GetNodeField(wrk, fields[i]);
         res.SetField(fields[i].fieldname, val);
     end;
-    if allowreflection then
+    if self.allowreflection then
       --рефлексия
       --Перебираем оставшиеся узлы
       sub1=wrk.childNodes;

@@ -30,5 +30,35 @@ inobject
   var fieldname: String; --Имя поля объекта Т9
   var repeatable: Logical; --Узел повторяется (в Т9 представляется массивом соотв. типа)
 
+  func LoadNodeValue(Node:AutoObject):variant;
+    var tmpS:String;
+
+    if varType(self.nodetype) = varInt then
+      --Простые типы
+      if self.nodetype = varString then
+         Result = Node.text;
+      elsif self.nodetype = varInt then
+         Result = Int(Node.text);
+      elsif self.nodetype = varNumeric then
+         --TODO: Экспоненциальный формат
+         Result = Num(Node.text);
+      elsif self.nodetype = varLogical then
+         tmpS =  Node.text;
+         if tmpS = nil or tmpS = '0' or Lo(tmpS)='false' or Lo(tmpS)='ложь' then
+            Result = False;
+         else
+            Result = True;
+         end;
+      --varDate    :Integer = 5;  -- ДатаВремя в формате TDateTime
+      --TODO!!!
+      end;
+    elsif varType(self.nodetype) = varObject:
+      --Объектные типы
+      if self.nodetype.Classtype = XMLMapper then
+         Result = self.nodetype.ParseNode(Node);
+      end;
+    end;
+  end;
+
 
 end
