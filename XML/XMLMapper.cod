@@ -16,6 +16,12 @@
 
 class "Сопоставитель XML с объектами Турбо9";
 inclass
+  proc AddInArray(var Array:Variant[]; Item:Variant);
+  var l:Integer;
+      l=LengthOfArray(Array);
+      Array[l+1]=Item;
+  end; 
+
 --  func ParseXSD(file): Variant[];
 --  -- первый элемент - неймспейс
 --  -- второй элемент - хранилище ключ - имя типа, значение - тип
@@ -54,7 +60,7 @@ inobject
           Node.removeChild(sub1.item(i));
           --Сохраняем значение
           if Nodedesc.repeatable then
-            СИС2.Функции.AddInArray(resa, res_);
+            AddInArray(resa, res_);
           else
             Break;
           end;
@@ -74,7 +80,7 @@ inobject
             --Узел удалять не надо - атрибуты уникальны.
             --Сохраняем значение
             if Nodedesc.repeatable then
-              СИС2.Функции.AddInArray(resa, res_);
+              AddInArray(resa, res_);
             else
               Break;
             end;
@@ -104,7 +110,9 @@ inobject
     end;
     wrk = Node.cloneNode(True); --Копируем узел, т.к. в процессе обработки будем удалять дочерние узлы.
     if t9class = nil then
-       res = Storage.Create;
+      res = Storage.Create;
+    else
+      res = t9class.Create;
     end;
     ii = lengthOfArray(fields);
     for i = 1..ii do
@@ -122,4 +130,47 @@ inobject
 
     Result = res;
   end;
+
+  func ExportNode(Source: Object; Target: AutoObject=nil): AutoObject;
+    --Здесь перебираем Поля
+    var val: AutoObject;
+    var i: Integer;
+    var ii: Integer;
+    var wrk: Variant[];
+    var j, jj: Integer;
+
+    if Source = nil then
+       return nil;
+    end;
+    if Target = nil then
+       Target = AutoObject.Create('Msxml2.XMLHTTP.6.0');
+    end;
+
+    ii = lengthOfArray(fields);
+    for i = 1..ii do
+        if fields[i].repeatable then
+           wrk = Source.GetField(fields[i].fieldname) as Variant[];
+           jj = LengthOfArray(wrk);
+           for j = 1..jj do
+              Target.appendChild(fields[i].SaveNodeValue(wrk[j], Target));
+           end;
+        else
+          Target.appendChild(
+            fields[i].SaveNodeValue(
+              Source.GetField(fields[i].fieldname),
+              Target));
+        end;
+    end;
+--    if self.allowreflection then
+--      --рефлексия
+--      --Перебираем оставшиеся узлы
+--      sub1=wrk.childNodes;
+--      for i = 1..sub1.length do
+--          res.SetField(sub1.item(i-1).nodeName, sub1.item(i-1).text);
+--      od;
+--    end;
+--
+    Result = Target;
+  end;
+
 end

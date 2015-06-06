@@ -44,8 +44,14 @@ inobject private
   Data[]:String; --Набор данных XML. Массив используется для добавления в конец без переприсвоения
   Depth[]:String; --Список открытых тэгов. FIFO-буфер для закрытия тэгов.
 inobject public
+  proc AddInArray(var Array:Variant[]; Item:Variant);
+  var l:Integer;
+      l=LengthOfArray(Array);
+      Array[l+1]=Item;
+  end; 
+
   proc ВРез synonym ToRes(more: String);
-     Сис2.Функции.AddInArray(Data, more);
+     AddInArray(Data, more);
   end;
 
   Proc ВРезЭкран synonym ToResScreen(more: String);
@@ -129,7 +135,7 @@ inobject public
     Result = '<?xml version="1.0" encoding="'+encoding+'"?>'+chr(10);
     ii = LengthOfArray(self.Data);
     for i = 1..ii do
-      Hint('Запись файла...', i, ii);
+      --Hint('Запись файла...', i, ii);
       Result = Result + self.Data[i];
     end;
   end;

@@ -60,5 +60,23 @@ inobject
     end;
   end;
 
+  func SaveNodeValue(Value: Variant; Doc:AutoObject=nil):AutoObject;
+    --Отсюда мы должны получить готовый узел
+    var data: AutoObject;
+    if varType(self.nodetype) = varInt then
+      --Простые типы
+      if nodetype = varString or nodetype = varInt or nodetype = varNumeric then
+         data = Doc.createTextNode(Str(Value));
+      elsif nodetype = varLogical then
+         if Value then
+            data = Doc.createTextNode("true");
+         else
+            data = Doc.createTextNode("true");
+         end;
+      end;
+    end;
+    --!!! Добавить обертку в тег!!!
+    Result = data;
+  end;
 
 end
