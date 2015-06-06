@@ -1,0 +1,37 @@
+class inherited TUL.Promise "Асинхронный результат HTTP-запроса";
+
+inclass
+   func Create: HTTPAsync;
+    Result = inherited Create;
+    Result.request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
+  end;
+
+inobject
+  request: AutoObject; --XMLHTTPRequest текущего запроса
+  Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
+
+  proc Wait;
+    --Дожидаемся результата, Без ГУИ опрос ОЛЕ виснет.
+     while not ready do
+       --sleep(1);
+       UIWait.ExecuteDialog;
+    od;
+  end;
+
+  func Ready:Logical;
+    --(4) COMPLETED All the data has been received, 
+    -- and the complete data is available in the responseBody and responseText properties.
+    return (request.readystate = 4);
+  end;
+
+  proc Abort;
+    inherited Abort;
+    self.request.abort;
+  end;
+
+  func Get:Variant;
+    self.Wait;
+    return HTTPCall.ParseResponse(self.request, self.Parser);
+  end;
+
+end

@@ -1,0 +1,28 @@
+class inherited HTTPCall "";
+
+inclass
+  func CreateEx(aHost:string; aMapper:Variant):SimpleRestGet;
+  --* INPUTS
+  --* HOST - адрес сервера со слешем на конце!
+  --* Mapper - как разбирать результат
+    Result = Create;
+    Result.Host = aHost;
+    Result.Parser = aMapper;
+  end;
+
+inobject
+  var Host: String;
+
+  func Вызвать synonym Call(Params:Variant[]): Variant;
+  --* Params - должне содержать 1 параметр - URL
+    var AsyncCla: Class;
+    self.DoRequest(self.host + Params[1]);
+
+    AsyncCla = FindClass('XMLRPC.HTTPAsync');
+    if result.InheritsFrom(AsyncCla) then
+       Result.id = self.host + Params[1];
+    end;
+
+  end;
+
+  end

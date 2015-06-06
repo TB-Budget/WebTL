@@ -1,0 +1,72 @@
+class inherited TUL.FuncObj "Веб-метод";
+
+inclass
+  func ParseResponse(request: Object; Parser: Variant): Variant;
+  var xRes: AutoObject;
+  var tmp: String;
+    if Parser = nil then
+      return request.responseText;
+    elsif varType(Parser) = varObject and Parser is TUL.FuncObj:
+      return Parser.Call([request]); --TODO: Это пока хрень, сделать проверку по входным типам
+    elsif varType(Parser) = varString and Parser = "JSON" then
+      --А еще сюда могут вести заголовки!
+      tmp = request.responseText;
+      return JSON.Parse(tmp);
+    elsif Parser is MapperNode then
+      --Указание на корень
+      xRes = request.responseXML;
+      return Parser.LoadNodeValue(xRes.documentElement);
+    elsif Parser is XMLMapper then
+      --Указание на содержимое корня
+      xRes = request.responseXML;
+      return Parser.ParseNode(xRes.documentElement);
+    end;
+  end;
+
+inobject
+  Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
+  Username: String;  --Логин на страничку (если нужен)
+  Password: String;  --Пароль от логина на страничку (если нужен)
+
+  func DoRequest(URL:String; Method:String="GET";  Body:Variant=nil;
+                 Headers:Storage=nil; Async:Logical=True):Variant;
+  var Request: AutoObject;
+  var AsyncCla: Class;
+  var i: Integer;
+    try
+      AsyncCla = FindClass('XMLRPC.HTTPAsync');
+    except
+      -- Нет класса для асинхронного ответа - работаем строго синхронно
+      Async = False;
+    end;
+    if Async then
+      Result = AsyncCla.Create;
+      Result.Parser = Parser;
+      request = Result.request;
+    else
+      request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
+    end;
+
+    if Headers <> nil then
+      for i = 1..Headers.Count do
+        request.setRequestHeader(Headers.IndexByNumber[i], Headers.ItemsByNumber[i]);
+      end;
+    end;
+
+    if Username <> nil then
+      request.open(Method, URL, Async, Username, Password);
+    else
+      request.open(Method, URL, Async);
+    end;
+    if Body = nil:
+      request.send();
+    else
+      request.send(Body);
+    fi;
+
+    if not Async then  --Асинхронка уже свой запрос получила и ждет ответа
+       return HTTPCall.ParseResponse(request, self.Parser);
+    end;
+  end;
+
+end

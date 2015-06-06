@@ -1,0 +1,33 @@
+class inherited TUL.FuncObj "";
+
+inclass
+   func Create: ResponseParser;
+     Result = inherited Create;
+     Result.ParamList[1]='Response';
+     Result.ParamTypes[1] = varVariant;
+     Result.ResultType = varVariant;
+     Result.Multi = False;
+   end;
+inobject
+   var Multi:Logical;
+
+   func Вызвать synonym Call(Params: Variant[]):Variant;
+   var xRes: Object;
+    if varType(Params[1]) = varString:
+      try
+        xRes = AutoObject.Create("Msxml2.DOMDocument.6.0");
+        xRes.Async = False;
+        xRes.loadXML(Params[1]);
+      except
+        SetError(502, 'Ошибка удаленного вызова процедуры');
+      end;
+    else
+      xRes = Params[1];
+    end;
+    if Multi then
+      return Client.ParseResp(xRes);
+    else
+      return Client.ParseResp(xRes)[1];
+    end;
+   end;
+end
