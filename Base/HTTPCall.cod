@@ -1,32 +1,54 @@
-class inherited TUL.FuncObj "���-�����";
+﻿--XMLRPC - удаленный вызов процедур (c) Златовратский Павел(ТБ.Бюджет), 2014
+
+--Данный проект является свободным программным обеспечением. Вы вправе распространять его
+--и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
+--более поздней версии Стандартной Общественной Лицензии Ограниченного Применения GNU,
+--опубликованной Free Software Foundation.
+
+--Мы распространяем этот проект в надежде на то, что он будет вам полезен, однако
+--НЕ ПРЕДОСТАВЛЯЕМ НА НЕГО НИКАКИХ ГАРАНТИЙ, в том числе ГАРАНТИИ ТОВАРНОГО СОСТОЯНИЯ ПРИ ПРОДАЖЕ
+--и ПРИГОДНОСТИ ДЛЯ ИСПОЛЬЗОВАНИЯ В КОНКРЕТНЫХ ЦЕЛЯХ. Для получения более подробной информации
+--ознакомьтесь со Стандартной Общественной Лицензией Ограниченного Применений GNU.
+
+--Вместе с данным проектом вы должны были получить экземпляр Стандартной Общественной Лицензии
+--Ограниченного Применения GNU. Если вы его не получили, сообщите об этом в Software Foundation, Inc.,
+--59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+class inherited TUL.FuncObj "Веб-метод";
 
 inclass
   func ParseResponse(request: Object; Parser: Variant): Variant;
   var xRes: AutoObject;
   var tmp: String;
+    --Ошибки HTTP
+    if request.status >= 300 then
+       --Данные с кодом 3хх - тоже ошибки
+       SetError(request.status, request.statusText);
+    end;
+
     if Parser = nil then
       return request.responseText;
     elsif varType(Parser) = varObject and Parser is TUL.FuncObj:
-      return Parser.Call([request]); --TODO: ��� ���� �����, ������� �������� �� ������� �����
+      return Parser.Call([request.responseText]); --TODO: Это пока хрень, сделать проверку по входным типам
     elsif varType(Parser) = varString and Parser = "JSON" then
-      --� ��� ���� ����� ����� ���������!
+      --А еще сюда могут вести заголовки!
       tmp = request.responseText;
       return JSON.Parse(tmp);
     elsif Parser is MapperNode then
-      --�������� �� ������
+      --Указание на корень
       xRes = request.responseXML;
       return Parser.LoadNodeValue(xRes.documentElement);
     elsif Parser is XMLMapper then
-      --�������� �� ���������� �����
+      --Указание на содержимое корня
       xRes = request.responseXML;
       return Parser.ParseNode(xRes.documentElement);
     end;
   end;
 
 inobject
-  Parser: Variant; --������ �� �����-������ ��� ��� ������� �����������
-  Username: String;  --����� �� ��������� (���� �����)
-  Password: String;  --������ �� ������ �� ��������� (���� �����)
+  Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
+  Username: String;  --Логин на страничку (если нужен)
+  Password: String;  --Пароль от логина на страничку (если нужен)
 
   func DoRequest(URL:String; Method:String="GET";  Body:Variant=nil;
                  Headers:Storage=nil; Async:Logical=True):Variant;
@@ -36,7 +58,7 @@ inobject
     try
       AsyncCla = FindClass('XMLRPC.HTTPAsync');
     except
-      -- ��� ������ ��� ������������ ������ - �������� ������ ���������
+      -- Нет класса для асинхронного ответа - работаем строго синхронно
       Async = False;
     end;
     if Async then
@@ -47,24 +69,25 @@ inobject
       request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
     end;
 
+    if Username <> nil then
+      request.open(Method, URL, Async, Username, Password);
+    else
+      request.open(Method, URL, Async);
+    end;
+
     if Headers <> nil then
       for i = 1..Headers.Count do
         request.setRequestHeader(Headers.IndexByNumber[i], Headers.ItemsByNumber[i]);
       end;
     end;
 
-    if Username <> nil then
-      request.open(Method, URL, Async, Username, Password);
-    else
-      request.open(Method, URL, Async);
-    end;
     if Body = nil:
       request.send();
     else
       request.send(Body);
     fi;
 
-    if not Async then  --���������� ��� ���� ������ �������� � ���� ������
+    if not Async then  --Асинхронка уже свой запрос получила и ждет ответа
        return HTTPCall.ParseResponse(request, self.Parser);
     end;
   end;
