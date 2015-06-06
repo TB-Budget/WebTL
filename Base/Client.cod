@@ -78,7 +78,7 @@ inclass Public
             sub2=sub1.item(i-1).getElementsByTagName("param");
             for j = 1..sub2.length do
                  --                                          value      само содержимое
-                 СИС2.Функции.AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
+                 AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
             end;
         elsif Lo(sub1.item(i-1).nodeName)="fault" then
          --ОБРАБОТКА ОШИБОК
