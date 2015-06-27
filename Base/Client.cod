@@ -84,7 +84,12 @@ inclass Public
          --ОБРАБОТКА ОШИБОК
          --                              value
          res = FromXmlRpc(sub1.item(i-1).firstChild.firstChild);
-         SetError(res.faultCode, res.faultString);
+         if varType(res.faultCode) = varInt then
+            SetError(res.faultCode, res.faultString);
+         else
+            SetError(0, res.faultString);
+         end;
+
         end;
 
     end;
