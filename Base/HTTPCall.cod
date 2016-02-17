@@ -84,7 +84,7 @@ inobject
     if Body = nil:
       request.send();
     else
-      request.send(Body);
+      request.send(Str(Body));
     fi;
 
     if not Async then  --Асинхронка уже свой запрос получила и ждет ответа
