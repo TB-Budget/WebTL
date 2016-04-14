@@ -156,7 +156,9 @@ inobject public
       F = TextFile.Create(Path, fmCreate, TextFile.Binary);
       F.Write(chr(0xEF) + chr(0xBB) + chr(0xBF));  -- UTF8
       F.Flush;
-      --F = Textfile.Create(Path, fmOpenReadWrite, Fenc);
+      F = nil;
+      F = Textfile.Create(Path, fmOpenReadWrite, Fenc);
+      F.Seek(0, 2);
     else
       F = Textfile.Create(Path, fmCreate, Fenc);
     end;
