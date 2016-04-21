@@ -1,0 +1,101 @@
+﻿--XMLRPC - инструменты для работы с XML и RPC (c) Златовратский Павел(ТБ.Бюджет), 2016
+
+--Данный проект является свободным программным обеспечением. Вы вправе распространять его
+--и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
+--более поздней версии Стандартной Общественной Лицензии Ограниченного Применения GNU,
+--опубликованной Free Software Foundation.
+
+--Мы распространяем этот проект в надежде на то, что он будет вам полезен, однако
+--НЕ ПРЕДОСТАВЛЯЕМ НА НЕГО НИКАКИХ ГАРАНТИЙ, в том числе ГАРАНТИИ ТОВАРНОГО СОСТОЯНИЯ ПРИ ПРОДАЖЕ
+--и ПРИГОДНОСТИ ДЛЯ ИСПОЛЬЗОВАНИЯ В КОНКРЕТНЫХ ЦЕЛЯХ. Для получения более подробной информации
+--ознакомьтесь со Стандартной Общественной Лицензией Ограниченного Применений GNU.
+
+--Вместе с данным проектом вы должны были получить экземпляр Стандартной Общественной Лицензии
+--Ограниченного Применения GNU. Если вы его не получили, сообщите об этом в Software Foundation, Inc.,
+--59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+class "Проверка XML файла по XSD схеме";
+
+inclass
+  stored var XMLSrc: String;
+  stored var XSDDefault: String;
+  stored var SchemeURL: String[];
+  stored var SchemeFile: String[];
+inobject
+  var URLScheme: TemplateSection;
+
+  func GetXSDPath: Storage;
+    var i:Integer;
+    Result = Storage.Create;
+
+    for i = 1..URLScheme.Count do
+       Result.SetField(SchemeURL[i], SchemeFile[i]);
+    end;
+  end;
+--------------------------------------------------------------------------------
+--{ Обработчики событий бланка
+  proc Button1OnClick(Sender :Button);
+  var xsdCheck: XSD;
+  var res: Variant;
+    xsdCheck = XSD.Create;
+    xsdCheck.DefaultXSD = XSDDefault;
+    xsdCheck.XSDPath = GetXSDPath;
+    res = xsdCheck.Validate(XMLSrc);
+    if res = True then
+       Message("OK");
+     else
+       Message("Error:"+ res.reason +chr(10) + "src:" + res.source);
+    end;
+  end;
+
+  func FieldXMLSrcOnLookup(Cell :TemplateCell; Value :Variant; var NewValue :Variant) :Logical;
+    -- Обработка события нажатия у клетки кнопки обзора
+    -- Параметры:
+    --   Cell: клетка шаблона
+    --   Value: старое значение в поле. Его тип зависит от типа поля.
+    --   NewValue: новое значение в поле. Его тип зависит от типа поля.
+    if ChooseFile(Newvalue, "Выберите файл") <> cmOk then
+       NewValue = Value;
+    end;
+    Result = False; -- Продолжаем стандартную обработку
+  end;
+
+  func FieldSchemeFileOnVerify(Cell :TemplateCell; Index :Integer; var Value :Variant) :Logical;
+    -- Проверка введенного значения
+    -- Параметры:
+    --   Cell: клетка шаблона
+    --   Index: номер кадра, в котором находится клетка
+    --   Value: значение, которое нужно проверить
+    var parser: XMLMapper;
+    var xsddoc: AutoObject;
+    var subres: Storage;
+    parser = XMLMapper.Create;
+    parser.fields[1] = MapperNode.Create;
+    parser.fields[1].nodekind = 2;
+    parser.fields[1].nodetype = varString;
+    parser.fields[1].fieldname = 'targetNamespace';
+    parser.fields[1].nodename = 'targetNamespace';
+    parser.fields[1].repeatable = false;
+    parser.allowreflection = False;
+
+    try
+      xsddoc = AutoObject.Create("MSXML2.DOMDocument.6.0");
+      xsddoc.async = false;
+--      xsddoc.validateOnParse = false;
+--      xsddoc.resolveExternals = true;
+      xsddoc.load(Value);
+      subres = parser.ParseNode(xsddoc.documentElement);
+    except
+      subres = nil;
+      Result = True;
+    end;
+    if subres <> nil and subres.FieldExists('targetNamespace') then
+      SchemeURL[Index] = subres.targetNamespace;
+    end;
+
+    Result = True; -- Разрешаем сохранить изменения в поле
+  end;
+
+--}
+
+end
