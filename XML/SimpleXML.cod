@@ -16,6 +16,12 @@
 
 class "Простейшее формирование XML";
 inclass public
+
+  func CreateEx(locUseBreakLine: logical = true): SimpleXML;
+    Result = SimpleXML.Create;
+    Result.UseBreakLine = locUseBreakLine;
+  end;
+
   func EasyStrorage(src: String):Storage;
   -- Key1=Value1#Key2=Value2
     var myStorage:Storage;
@@ -41,6 +47,8 @@ inclass public
   end;
 
 inobject private
+
+  UseBreakLine: logical;
   Data[]:String; --Набор данных XML. Массив используется для добавления в конец без переприсвоения
   Depth[]:String; --Список открытых тэгов. FIFO-буфер для закрытия тэгов.
 inobject public
@@ -110,7 +118,7 @@ inobject public
          ToRes("'");
       od;
     fi;
-    ToRes(">");
+    ToRes(if(UseBreakLine, ">" + Chr(13), ">"));
     InsertInArray(Depth, 1, Name);
   end;
 
@@ -118,7 +126,7 @@ inobject public
     var Name:String;
     Name = Depth[1];
     DeleteFromArray(Depth,1);
-    ToRes("</" + Name + ">");
+    ToRes(if(UseBreakLine, "</" + Name + ">" + Chr(13), "</" + Name + ">"));
     Result = Name;
   end;
 
