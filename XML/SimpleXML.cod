@@ -59,7 +59,7 @@ inobject public
   end; 
 
   proc ВРез synonym ToRes(more: String);
-     AddInArray(Data, more);
+    AddInArray(Data, more);
   end;
 
   Proc ВРезЭкран synonym ToResScreen(more: String);
@@ -131,9 +131,10 @@ inobject public
   end;
 
   proc СоздатьТэг synonym CreateTag(Name: String; Content: String; Attrib: Storage);
-     OpenTag(Name, Attrib);
-     ToResScreen(Content);
-     CloseTag;
+    OpenTag(Name, Attrib);
+    Content = (if(UseBreakLine, Content + Chr(13), Content));
+    ToResScreen(Content);
+    CloseTag;
   end;
 
   func ОднойСтрокой synonym OneString(Encoding: String='windows-1251'): String;
