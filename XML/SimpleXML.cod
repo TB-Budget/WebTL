@@ -118,7 +118,7 @@ inobject public
          ToRes("'");
       od;
     fi;
-    ToRes(if(UseBreakLine, ">" + Chr(13), ">"));
+    ToRes(">");
     InsertInArray(Depth, 1, Name);
   end;
 
@@ -132,7 +132,6 @@ inobject public
 
   proc СоздатьТэг synonym CreateTag(Name: String; Content: String; Attrib: Storage);
     OpenTag(Name, Attrib);
-    Content = (if(UseBreakLine, Content + Chr(13), Content));
     ToResScreen(Content);
     CloseTag;
   end;
