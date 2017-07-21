@@ -1,4 +1,4 @@
-﻿--XMLRPC - удаленный вызов процедур (c) Златовратский Павел(ТБ.Бюджет), 2014
+﻿--WebTL - библиотека для работа с технологиями Интернет (c) Златовратский Павел(ТБ.Бюджет), 2017
 
 --Данный проект является свободным программным обеспечением. Вы вправе распространять его
 --и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
@@ -19,12 +19,15 @@ class inherited TUL.Promise "Асинхронный результат HTTP-за
 inclass
    func Create: HTTPAsync;
     Result = inherited Create;
+    result.ready_ = False;
     Result.request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
   end;
 
 inobject
   request: AutoObject; --XMLHTTPRequest текущего запроса
   Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
+  result_: Variant;
+  ready_: Logical;
 
   proc Wait;
     --Дожидаемся результата, Без ГУИ опрос ОЛЕ виснет.
@@ -35,6 +38,9 @@ inobject
   end;
 
   func Ready:Logical;
+    if self.ready_ then
+      return True;
+    fi;
     --(4) COMPLETED All the data has been received, 
     -- and the complete data is available in the responseBody and responseText properties.
     return (request.readystate = 4);
@@ -46,11 +52,17 @@ inobject
   end;
 
   func Get:Variant;
+    if self.ready_ then
+       return self.result_;
+    fi;
+
     self.Wait;
     result = HTTPCall.ParseResponse(self.request, self.Parser);
     if self.postprocess <> nil then
        result = self.postprocess.Call([result]);
     end;
+    self.result_ = result;
+    self.ready_ = True;
   end;
 
 end

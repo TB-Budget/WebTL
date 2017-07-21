@@ -1,0 +1,138 @@
+﻿--WebTL - библиотека для работа с технологиями Интернет (c) Златовратский Павел(ТБ.Бюджет), 2017
+
+--Данный проект является свободным программным обеспечением. Вы вправе распространять его
+--и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
+--более поздней версии Стандартной Общественной Лицензии Ограниченного Применения GNU,
+--опубликованной Free Software Foundation.
+
+--Мы распространяем этот проект в надежде на то, что он будет вам полезен, однако
+--НЕ ПРЕДОСТАВЛЯЕМ НА НЕГО НИКАКИХ ГАРАНТИЙ, в том числе ГАРАНТИИ ТОВАРНОГО СОСТОЯНИЯ ПРИ ПРОДАЖЕ
+--и ПРИГОДНОСТИ ДЛЯ ИСПОЛЬЗОВАНИЯ В КОНКРЕТНЫХ ЦЕЛЯХ. Для получения более подробной информации
+--ознакомьтесь со Стандартной Общественной Лицензией Ограниченного Применений GNU.
+
+--Вместе с данным проектом вы должны были получить экземпляр Стандартной Общественной Лицензии
+--Ограниченного Применения GNU. Если вы его не получили, сообщите об этом в Software Foundation, Inc.,
+--59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+class "Структуры для вызова процедур ТБ из внешней программы";
+   import classes Conversion;
+inclass Public
+  --/****if*  Calling/ParseReq
+  --* SUMMARY
+  --* Разбирает XMLRPC запрос
+  --* SYNOPSIS
+  func ParseReq(Request:String):Variant[];
+  --* INPUTS
+  --* Request - XML-строка запроса в соответствии со спецификацией XMLRPC
+  --* OUTPUTS
+  --* Вывод является массивом из двух элементов:
+  --* * Первый элемент - имя метода
+  --* * Второй элемент - массив параметров
+  --* SOURCE
+  var Dom,root:AutoObject;
+  var sub1,sub2:AutoObject;
+  var MethName:String;
+  var Params:Variant[];
+  var i,j:Integer;
+    Dom=AutoObject.Create("Msxml2.DOMDocument.6.0");
+    Dom.Async=False;
+    Dom.loadXML(Request);
+    root=Dom.documentElement;--methodcall
+    sub1=root.childNodes;
+    for i = 1..sub1.length do
+        if Lo(sub1.item(i-1).nodeName)="methodname" then
+            MethName=GetNodeValue(sub1.item(i-1));
+        elsif Lo(sub1.item(i-1).nodeName)="params" then
+            Params=[];
+            sub2=sub1.item(i-1).getElementsByTagName("param");
+            for j = 1..sub2.length do
+                 --                                          value      само содержимое
+                 Conversion.AddInArray(Params,FromXmlRpc(sub2.item(j-1).firstChild.firstChild));
+            end;
+        end;
+    end;
+    Result = [MethName,Params] ;
+  end;
+  --****
+  --/****if*  Calling/EncodeParams
+  --* SUMMARY
+  --* Упаковывает массив параметров в XMLRPC
+  --* SYNOPSIS
+  func EncodeParams(aDoc:AutoObject;Params:Variant[]):AutoObject;
+  --* INPUTS
+  --* aDoc - Автообъект Msxml2.DomDocument в котором будут находиться элементы XML
+  --* Params - Массив параметров для упаковки
+  --* OUTPUTS
+  --* Автообъект - узел XML(DomDocument) описывающий параметры по XMLRPC
+  --* SOURCE
+  var sub1,sub2,sub3,sub4:AutoObject;
+  var i:Integer;
+    sub1=aDoc.createElement("params");
+    for i = 1..LengthOfArray(Params) do
+        sub2=aDoc.createElement("param");
+        sub3=aDoc.createElement("value");
+        sub4=AsXmlRpcNode(aDoc,Params[i]);
+        sub3.AppendChild(sub4);
+        sub2.AppendChild(sub3);
+        sub1.AppendChild(sub2);
+    end;
+    Result = sub1;
+  end;
+  --****
+  --/****if*  Calling/EncodeFault
+  --* SUMMARY
+  --* Упаковывает ошибку в XMLRPC
+  --* SYNOPSIS 
+  func EncodeFault(aDoc:AutoObject;code:Integer;text:String):AutoObject;
+  --* INPUTS
+  --* aDoc - Автообъект Msxml2.DomDocument в котором будут находится элементы XML
+  --* code - Код ошибки
+  --* text - Текстовое описание ошибки
+  --* OUTPUTS
+  --* Автообъект - узел XML(DomDocument) описывающий ошибку по XMLRPC
+  --* SOURCE
+  var Err:Storage;
+  var sub1,sub2,sub3:AutoObject;
+    Err=Storage.Create;
+    Err.faultCode=code;
+    Err.faultString=text;
+    sub1=aDoc.createElement("fault");
+    sub2=aDoc.createElement("value");
+    sub3=AsXmlRpcNode(aDoc,Err);
+    sub2.AppendChild(sub3);
+    sub1.AppendChild(sub2);
+    Result = sub1;
+  end;
+  --****
+  --/****f*  Calling/Caller
+  --* SUMMARY
+  --* Реализует сервер вызова XMLRPC
+  --* SYNOPSIS 
+  func Caller(Request:string):string;
+  --* INPUTS
+  --* Строка запроса XMLRPC
+  --* OUTPUTS
+  --* Строка ответа XMLRPC
+  --* SOURCE
+  var ParseRes:Variant[];
+  var target:TUL.ClassMeth;
+  var Res:Variant;
+  var xRes,nRes,root:AutoObject;
+    xRes=AutoObject.Create("Msxml2.DOMDocument.6.0");
+    xRes.Async=False;
+    xRes.loadXML('<?xml version="1.0" encoding="windows-1251"?>');
+    root=xRes.createElement("methodResponse");
+    xRes.AppendChild(root);
+    try
+      ParseRes=ParseReq(Request);
+      target=TUL.ClassMeth.CreateExS(ParseRes[1]);
+      Res=target.Call(ParseRes[2] as Variant[]);
+      nRes=EncodeParams(xRes,[Res]);
+    except
+      nRes=EncodeFault(xRes,ErrorCode,ErrorText);
+    end;
+    root.AppendChild(nRes);
+    Result ='<?xml version="1.0" encoding="windows-1251"?>' + xRes.xml ;
+  end;
+  --****
+end

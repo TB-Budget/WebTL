@@ -1,0 +1,195 @@
+﻿--WebTL - библиотека для работа с технологиями Интернет (c) Златовратский Павел(ТБ.Бюджет), 2017
+
+--Данный проект является свободным программным обеспечением. Вы вправе распространять его
+--и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
+--более поздней версии Стандартной Общественной Лицензии Ограниченного Применения GNU,
+--опубликованной Free Software Foundation.
+
+--Мы распространяем этот проект в надежде на то, что он будет вам полезен, однако
+--НЕ ПРЕДОСТАВЛЯЕМ НА НЕГО НИКАКИХ ГАРАНТИЙ, в том числе ГАРАНТИИ ТОВАРНОГО СОСТОЯНИЯ ПРИ ПРОДАЖЕ
+--и ПРИГОДНОСТИ ДЛЯ ИСПОЛЬЗОВАНИЯ В КОНКРЕТНЫХ ЦЕЛЯХ. Для получения более подробной информации
+--ознакомьтесь со Стандартной Общественной Лицензией Ограниченного Применений GNU.
+
+--Вместе с данным проектом вы должны были получить экземпляр Стандартной Общественной Лицензии
+--Ограниченного Применения GNU. Если вы его не получили, сообщите об этом в Software Foundation, Inc.,
+--59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+class  'Преобразование Типов между ТБ и XML-RPC';
+  import TUL Classes Base64;
+InClass Public
+  --Служебное,но полезное
+  func ZeroStr(Src:Integer;Size:Integer):String;
+  var l,i:Integer;
+  var Stri:String;
+    Stri=Str(Src);
+    l=Length(Stri);
+    if i<Size then
+       for i = 1..Size-l do
+           Stri="0"+Stri;
+       end;
+    end;
+    Result = Stri;
+  end;
+
+  proc AddInArray(var Array:Variant[]; Item:Variant);
+  var l:Integer;
+      l=LengthOfArray(Array);
+      Array[l+1]=Item;
+  end; 
+
+  --Конверсии в ноды и обратно
+  func AsXmlRpcNode(var aDoc:AutoObject; aVar:Variant):AutoObject;
+  var Res,sub1,sub2,txt:AutoObject;
+  var arr:Variant[];
+  var t,i:Integer;
+  var bVar:BinaryObject;
+    t=VarType(aVar);
+    if t=varString then
+       Res=aDoc.CreateElement("string");
+       txt=aDoc.CreateTextNode(aVar);
+       Res.AppendChild(txt);
+    elsif t=varInt then
+       Res=aDoc.CreateElement("i4");
+       txt=aDoc.CreateTextNode(Str(aVar));
+       Res.AppendChild(txt);
+    elsif t=varNumeric then
+       Res=aDoc.CreateElement("double");
+       txt=aDoc.CreateTextNode(Str(aVar));
+       Res.AppendChild(txt);
+    elsif t=varLogical then
+       Res=aDoc.CreateElement("boolean");
+       if aVar then
+          txt=aDoc.CreateTextNode("1");
+       else
+          txt=aDoc.CreateTextNode("0");
+       end;
+       Res.AppendChild(txt);
+    elsif t=varDate then
+       Res=aDoc.CreateElement("dateTime.iso8601");
+       txt=aDoc.CreateTextNode(Str(Year(aVar))+ZeroStr(Mon(aVar),2)+ZeroStr(Day(aVar),2)
+       +"T"+ZeroStr(Hour(aVar),2)+":"+ZeroStr(Minute(aVar),2)+":"+ZeroStr(Int(Second(aVar)),2));
+       Res.AppendChild(txt);
+    elsif t=varArray then
+       arr=aVar as Variant[];
+       Res=aDoc.CreateElement("array");
+       sub1=aDoc.CreateElement("data");
+       Res.AppendChild(sub1);
+       for i = 1..LengthOfArray(arr) do
+         sub2=aDoc.CreateElement("value");
+         sub1.AppendChild(sub2);
+         txt=AsXmlRpcNode(aDoc,arr[i]);
+         sub2.AppendChild(txt);
+       end;
+    elsif t=varObject then
+      if aVar is Storage then
+         Res=aDoc.CreateElement("struct");
+         for i = 1..aVar.Count do
+           sub1=aDoc.CreateElement("member");
+           sub2=aDoc.CreateElement("name");
+           txt=aDoc.CreateTextNode(aVar.IndexByNumber[i]);
+           sub2.AppendChild(txt);
+           sub1.AppendChild(sub2);
+           sub2=aDoc.CreateElement("value");
+           txt=AsXmlRpcNode(aDoc,aVar.ItemsByNumber[i]);
+           sub2.AppendChild(txt);
+           sub1.AppendChild(sub2);
+           Res.AppendChild(sub1);
+         end;
+      elsif aVar is BinaryObject then
+         bVar=aVar as BinaryObject;
+         Res=aDoc.CreateElement("base64");
+         txt=aDoc.CreateTextNode(Encode64(bVar.AsString));
+         Res.AppendChild(txt);
+      end;
+    elsif aVar=nil then
+       --временная поддержка как пустого значения. В будущем - использовать расширение None
+       Res=aDoc.CreateElement("boolean");
+       txt=aDoc.CreateTextNode("0");
+       Res.AppendChild(txt);
+    end;
+    Result=Res;
+  end;
+
+  func GetNodeValue(Node:AutoObject):String;
+  var sub1:AutoObject;
+  var i:Integer;
+      sub1=Node.childNodes;
+      for i = 1..sub1.length do
+         if sub1.item(i-1).nodeType=3 or sub1.item(i-1).nodeType=4 then
+            Result = sub1.item(i-1).nodeValue;
+            break;
+         fi;
+      od;
+
+  end;
+
+  func FromXmlRpc(Node:AutoObject):Variant;
+  var sub1,sub2,sub3:AutoObject;
+  var i,j,k:Integer;
+  var Res:Variant;
+  var aRes:Variant[];
+  var sRes:Storage;
+  var txt:String;
+  var bVar:BinaryObject;
+    if Lo(Node.nodeName)="string" then
+       Result=GetNodeValue(Node);
+    elsif Lo(Node.nodeName)="i4" or Lo(Node.nodeName)="int" then
+       Result=Int(GetNodeValue(Node));
+    elsif Lo(Node.nodeName)="double" then
+       Result=Num(GetNodeValue(Node));
+    elsif Lo(Node.nodeName)="boolean" then
+       Result=(GetNodeValue(Node)="1");
+    elsif Lo(Node.nodeName)="dateTime.iso8601" then
+       txt=GetNodeValue(Node);              --используя pos перестроить на обработку формата YYYY-MM-DDThh:mm:ss.sTZD http://www.w3.org/TR/NOTE-datetime
+       if pos("T",txt)=1 then
+          Result = nil;
+         else
+          Result=CreateDate(Int(Substr(txt,7,2)),Int(Substr(txt,5,2)),Int(Substr(txt,1,4)),Int(Substr(txt,10,2)),Int(Substr(txt,13,2)),Int(Substr(txt,16,2)));
+       end;
+    elsif Lo(Node.nodeName)="base64" then
+       bVar=BinaryObject.Create;
+       bVar.AsString=Decode64(GetNodeValue(Node));
+       Result=bVar;
+    elsif Lo(Node.nodeName)="array" then
+      sub1=Node.childNodes;--getElementsByTagName("data");
+      for i = 1..sub1.length do
+         if Lo(sub1.item(i-1).nodeName)="data" then
+            sub2=sub1.item(i-1).childNodes;--getElementsByTagName("value");
+            aRes=[];
+            for j = 1..sub2.length do
+              if Lo(sub2.item(i-1).nodeName)="value" then
+                sub3=sub2.item(j-1).childNodes;
+                for k = 1..sub3.length do
+                  if sub3.item(k-1).nodeType=1 then
+                     СИС2.Функции.AddInArray(aRes,FromXmlRpc(sub3.item(k-1)));
+                  end;
+                end;
+              end;
+            end;
+         end;
+      end;
+      Result=aRes;
+    elsif Lo(Node.nodeName)="struct" then
+      sRes=Storage.Create;
+      sub1=Node.childNodes;
+      --sub1=Node.getElementsByTagName("member");
+      for i = 1..sub1.length do
+         if Lo(sub1.item(i-1).nodeName)="member" then
+            sub2=sub1.item(i-1).childNodes;
+            for j = 1..sub2.length do
+              if Lo(sub2.item(j-1).nodeName)="name" then
+                 txt=GetNodeValue(sub2.item(j-1));
+              elsif Lo(sub2.item(j-1).nodeName)="value" then
+                 Res= FromXmlRpc(sub2.item(j-1).firstChild);
+              end;
+            end;
+            sRes.SetField(txt,Res);
+         end;
+      end;
+      Result=sRes;
+    else
+      Result=nil;
+    end;
+  end;
+
+end

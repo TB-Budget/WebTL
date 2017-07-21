@@ -1,4 +1,4 @@
-﻿--XMLRPC - удаленный вызов процедур (c) Златовратский Павел(ТБ.Бюджет), 2014
+﻿--WebTL - библиотека для работа с технологиями Интернет (c) Златовратский Павел(ТБ.Бюджет), 2017
 
 --Данный проект является свободным программным обеспечением. Вы вправе распространять его
 --и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
@@ -33,12 +33,12 @@ inclass
     elsif varType(Parser) = varString and Parser = "JSON" then
       --А еще сюда могут вести заголовки!
       tmp = request.responseText;
-      return JSON.Parse(tmp);
-    elsif Parser is MapperNode then
+      return TUL.JSON.Parse(tmp);
+    elsif Parser is TUL.XMLMapperNode then
       --Указание на корень
       xRes = request.responseXML;
       return Parser.LoadNodeValue(xRes.documentElement);
-    elsif Parser is XMLMapper then
+    elsif Parser is TUL.XMLMapper then
       --Указание на содержимое корня
       xRes = request.responseXML;
       return Parser.ParseNode(xRes.documentElement);
@@ -56,7 +56,7 @@ inobject
   var AsyncCla: Class;
   var i: Integer;
     try
-      AsyncCla = FindClass('XMLRPC.HTTPAsync');
+      AsyncCla = FindClass('WebTL.HTTPAsync');
     except
       -- Нет класса для асинхронного ответа - работаем строго синхронно
       Async = False;
@@ -90,6 +90,7 @@ inobject
     if not Async then  --Асинхронка уже свой запрос получила и ждет ответа
        return HTTPCall.ParseResponse(request, self.Parser);
     end;
+    --Возврат асинхронного ответа будет за счёт присовения его в Result ранее
   end;
 
 end

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Version="1">
+  <Options Caption="WebTL" Comment="Web Turbo Library" Version="0.1" Author="Copyright © 2016 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
+  <Usage>
+    <Project Name="СИС2"/>
+    <Project Name="TUL"/>
+  </Usage>
+  <Groups>
+    <Group Name="ClientTypes" Type="Classes" Disabled="False"/>
+    <Group Name="Base" Type="Classes" Disabled="False"/>
+    <Group Name="GUI" Type="Blanks" Disabled="False"/>
+    <Group Name="Utility" Type="Classes" Disabled="False"/>
+    <Group Name="XMLRPC" Type="Classes" Disabled="False"/>
+  </Groups>
+</Project>
