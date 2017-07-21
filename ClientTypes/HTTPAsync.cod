@@ -20,7 +20,7 @@ inclass
    func Create: HTTPAsync;
     Result = inherited Create;
     result.ready_ = False;
-    Result.request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
+    Result.request = AutoObject.Create("Msxml2.ServerXMLHTTP.6.0");
   end;
 
 inobject
@@ -30,10 +30,8 @@ inobject
   ready_: Logical;
 
   proc Wait;
-    --Дожидаемся результата, Без ГУИ опрос ОЛЕ виснет.
      while not ready do
-       --sleep(1);
-       UIWait.ExecuteDialog;
+       request.waitForResponse(1000);
     od;
   end;
 
@@ -55,7 +53,6 @@ inobject
     if self.ready_ then
        return self.result_;
     fi;
-
     self.Wait;
     result = HTTPCall.ParseResponse(self.request, self.Parser);
     if self.postprocess <> nil then

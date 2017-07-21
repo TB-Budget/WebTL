@@ -49,6 +49,12 @@ inobject
   Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
   Username: String;  --Логин на страничку (если нужен)
   Password: String;  --Пароль от логина на страничку (если нужен)
+  Timeouts: Integer[]; --Таймауты
+
+  proc setTimeouts(resolveTimeout:Integer=60; connectTimeout:Integer=60;
+                   sendTimeout:Integer=30; receiveTimeout:Integer=30);
+    self.Timeouts = [resolveTimeout, connectTimeout, sendTimeout, receiveTimeout];
+  end;
 
   func DoRequest(URL:String; Method:String="GET";  Body:Variant=nil;
                  Headers:Storage=nil; Async:Logical=True):Variant;
@@ -66,9 +72,13 @@ inobject
       Result.Parser = Parser;
       request = Result.request;
     else
-      request = AutoObject.Create("Msxml2.XMLHTTP.6.0");
+      request = AutoObject.Create("Msxml2.ServerXMLHTTP.6.0");
     end;
-
+    --Установка таймаутов
+    if LengthOfArray(self.Timeouts) = 4:
+       request.setTimeouts(Timeouts[1], Timeouts[2], Timeouts[3], Timeouts[4]);
+    fi;
+    --запрос с авторизацией
     if Username <> nil then
       request.open(Method, URL, Async, Username, Password);
     else
@@ -80,7 +90,6 @@ inobject
         request.setRequestHeader(Headers.IndexByNumber[i], Headers.ItemsByNumber[i]);
       end;
     end;
-
     if Body = nil:
       request.send();
     else

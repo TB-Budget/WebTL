@@ -17,7 +17,8 @@
 class inherited HTTPCall "Функция XML-RPC как объект";
 
 inclass
-  func CreateEx(aURL:string; aMethod:string; MultiRes:Logical=True):XMLRPCFunc;
+  func CreateEx synonym New(aURL:string; aMethod:string;
+                            MultiRes:Logical=True; AllowAsync:Logical=True): XMLRPCFunc;
   --* INPUTS
   --* URL - адрес сервера XMLRPC
   --* Method - название вызываемого метода
@@ -26,11 +27,13 @@ inclass
     Result.Method = aMethod;
     Result.Parser = ResponseParser.Create;
     Result.Parser.Multi = MultiRes;
+    Result.TryAsync = not AllowAsync;
   end;
 
 inobject
   var URL: String;
   var Method: String;
+  var TryAsync: Logical;
 
   func Вызвать synonym Call(Params:Variant[]): Variant;
     var hdr: Storage;
@@ -40,9 +43,9 @@ inobject
       hdr = Storage.Create;
       hdr.SetField("Content-Type","text/xml; charset=windows-1251");
       xReq = Client.EncodeRequest(self.Method, Params);
-      result = self.DoRequest(self.URL, "POST", xReq.xml, hdr);
+      result = self.DoRequest(self.URL, "POST", xReq.xml, hdr, self.TryAsync);
 
-      AsyncCla = FindClass('XMLRPC.HTTPAsync');
+      AsyncCla = FindClass('WebTL.HTTPAsync');
       if result.InheritsFrom(AsyncCla) then
         AddCRC32(id, URL);
         AddCRC32(id, xReq.xml);
@@ -50,6 +53,5 @@ inobject
       end;
 
   end;
-
 
 end
