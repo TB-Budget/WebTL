@@ -27,7 +27,7 @@ inclass
     Result.Method = aMethod;
     Result.Parser = ResponseParser.Create;
     Result.Parser.Multi = MultiRes;
-    Result.TryAsync = not AllowAsync;
+    Result.TryAsync = AllowAsync;
   end;
 
 inobject
