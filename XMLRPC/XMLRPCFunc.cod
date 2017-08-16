@@ -46,10 +46,10 @@ inobject
       result = self.DoRequest(self.URL, "POST", xReq.xml, hdr, self.TryAsync);
 
       AsyncCla = FindClass('WebTL.HTTPAsync');
-      if result.InheritsFrom(AsyncCla) then
-        AddCRC32(id, URL);
-        AddCRC32(id, xReq.xml);
-        Result.id  = id;
+      if VarType(result) = 6 and result.InheritsFrom(AsyncCla) then
+          AddCRC32(id, URL);
+          AddCRC32(id, xReq.xml);
+          Result.id  = id;
       end;
 
   end;

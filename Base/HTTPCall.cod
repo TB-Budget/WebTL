@@ -15,24 +15,33 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 class inherited TUL.FuncObj "Веб-метод";
-
 inclass
+  external func MultiByteToWideChar(cp: Integer; dwFlags: Integer;
+     const AnsiStr: String; AnsiStrL: Integer; var WStr: String; WStrL: Integer) :Integer;
+    library "kernel32" name "MultiByteToWideChar";
+
   func ParseResponse(request: Object; Parser: Variant): Variant;
   var xRes: AutoObject;
   var tmp: String;
+  var tmpI:Integer;
     --Ошибки HTTP
     if request.status >= 300 then
        --Данные с кодом 3хх - тоже ошибки
        SetError(request.status, request.statusText);
     end;
-
+    tmp = request.responseText;
+    if Substr(tmp,1,5) = "<?xml" and Pos("1251", Substr(tmp,6,40)) > 0 then
+       tmpI = request.responseBody.Size;
+       tmp = RepStr(chr(20), tmpI);
+       MultiByteToWideChar(1251,0,TUL.Unicode.BOToPseudoByte(request.responseBody), tmpI, tmp, tmpI);
+    fi;
     if Parser = nil then
-      return request.responseText;
+      return tmp;
     elsif varType(Parser) = varObject and Parser is TUL.FuncObj:
-      return Parser.Call([request.responseText]); --TODO: Это пока хрень, сделать проверку по входным типам
+      return Parser.Call([tmp]); --TODO: Это пока хрень, сделать проверку по входным типам
     elsif varType(Parser) = varString and Parser = "JSON" then
       --А еще сюда могут вести заголовки!
-      tmp = request.responseText;
+      --tmp = request.responseText;
       return TUL.JSON.Parse(tmp);
     elsif Parser is TUL.XMLMapperNode then
       --Указание на корень
