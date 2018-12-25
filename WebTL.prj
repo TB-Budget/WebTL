@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Project Version="1">
-  <Options Caption="WebTL" Comment="Web Turbo Library" Version="0.1" Author="Copyright © 2016 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
+  <Options Caption="WebTL" Comment="Web Turbo Library" Version="002" Author="Copyright © 2016-2019 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
   <Usage>
     <Project Name="СИС2"/>
     <Project Name="TUL"/>
