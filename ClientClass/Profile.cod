@@ -1,0 +1,9 @@
+class "";
+
+inclass public
+
+  proc GetSessionInfo;
+    AddSessionInfo('Системные проекты', 'Версия проекта ' + ClassProject + ' : ' + Str(Constants.ПолучитьВерсиюПроекта, '0.000'));
+  end;
+
+end

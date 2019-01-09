@@ -1,0 +1,21 @@
+class "";
+
+inclass public
+
+  ИмяВерсииПроекта: String = 'WebTL.ВерсияПроекта';
+
+  func ПолучитьВерсиюПроекта: Numeric;
+    Result = СформироватьВерсиюПроекта(ClassProject);
+  end;
+
+inclass private
+
+  func СформироватьВерсиюПроекта (const aProjectName: String ): Numeric;
+    var locVerStr: string;
+    var locStafeNum: integer;
+    locVerStr = BaseInfo.ProjectByName[aProjectName].Version;
+    2_locStafeNum = 1;. -- ЭТАП РАЗРАБОТКИ
+    Result = Num( Str(locStafeNum) + '.' + locVerStr );
+  end;
+
+end
