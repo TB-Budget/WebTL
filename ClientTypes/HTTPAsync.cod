@@ -26,8 +26,16 @@ inclass
 inobject
   request: AutoObject; --XMLHTTPRequest текущего запроса
   Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
+  postprocess: TUL.FuncObj; --Дополнительная обработка результата
   result_: Variant;
   ready_: Logical;
+
+  func Equal(ob:HTTPAsync):Logical;
+    if ob = nil then
+       return False;
+    end;
+    Result = (ob.id = self.id);
+  end;
 
   proc Wait;
      while not ready do
@@ -49,7 +57,7 @@ inobject
     self.request.abort;
   end;
 
-  func Get:Variant;
+  func Get_:Variant;
     if self.ready_ then
        return self.result_;
     fi;

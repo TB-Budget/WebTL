@@ -84,6 +84,7 @@ InClass Public
       if aVar is Storage then
          Res=aDoc.CreateElement("struct");
          for i = 1..aVar.Count do
+          if aVar.IndexByNumber[i] <> nil then
            sub1=aDoc.CreateElement("member");
            sub2=aDoc.CreateElement("name");
            txt=aDoc.CreateTextNode(aVar.IndexByNumber[i]);
@@ -94,6 +95,7 @@ InClass Public
            sub2.AppendChild(txt);
            sub1.AppendChild(sub2);
            Res.AppendChild(sub1);
+          fi;
          end;
       elsif aVar is BinaryObject then
          bVar=aVar as BinaryObject;
