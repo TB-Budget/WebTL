@@ -77,6 +77,21 @@ var Value:String[];
 
   end;
 
+  proc Button11OnClick(Sender :Button);
+  var u: TUL.Unicode;
+    u = TUL.Unicode.FromUTF16(Inp);
+    Out = Str(u.chars);
+  end;
+
+  proc ButtonU2OnClick(Sender :Button);
+  var u: TUL.Unicode;
+    u = TUL.Unicode.Create;
+    FromStr(u.chars, Inp);
+    Out = u.ToUTF16;
+      
+  end;
+
+
   proc Button2OnClick(Sender :Button);
     Out=Caller(Inp);
   end;
@@ -93,11 +108,11 @@ var Value:String[];
 
 
   proc Button4OnClick(Sender :Button);
-    Out=Encode64(Inp);
+    Out=TUL.Base64.Encode64(Inp);
   end;
 
   proc Button5OnClick(Sender :Button);
-    Out=Decode64(Inp);
+    Out=TUL.Base64.Decode64(Inp);
   end;
 
   proc Button21OnClick(Sender :Button);
@@ -105,13 +120,26 @@ var Value:String[];
   var filter: Storage;
   var i:Integer;
   var res: variant;
+  var f: Tul.FuncObj;
     filter = Storage.Create;
     for i = 1..filter_by.Count do
         filter.SetField(Key[i], Value[i]);
     end;
     params[1] = filter;
-    res = SimpleCall(RPCUrl,RPCMeth,params);
+
+    --res = SimpleCall("http://localhost:9766","TransList",["*.401.50.*",1.1.2017, 1.1.2018]);
+    f = XMLRPCFunc.CreateEx("http://localhost:9766", "TransList", False);
+    res = f.Call(["*.401.50.*",1.1.2017, 1.1.2018]);
+    params = res;
     Out = Str(res);
+  end;
+
+  proc Button6OnClick(Sender :Button);
+   var st:Storage;
+     st = Storage.create;
+     st.sux = self;
+     Out = st.Evaluate("sux.Inp + '123' ");
+
   end;
 
 --}
