@@ -15,7 +15,6 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 class  'Полезные функции';
-   import СИС2 Classes Web.Utils;
 
 InClass Public
 
@@ -81,14 +80,14 @@ InClass Public
       end;
    end;
 
-   func GetRecordData(RecordKey:String; FetchIntrenal:Logical=False):Storage;
-   var Rec:Document;
-     if Substr(recordKey,1,1)<>"{" then
-        recordKey="{"+Recordkey+"}";
-     end;
-     Rec=GetDocByID(RecordKey);
-     Result=GetRowData(Rec,FetchIntrenal);
-   end;
+--   func GetRecordData(RecordKey:String; FetchIntrenal:Logical=False):Storage;
+--   var Rec:Document;
+--     if Substr(recordKey,1,1)<>"{" then
+--        recordKey="{"+Recordkey+"}";
+--     end;
+--     Rec=GetDocByID(RecordKey);
+--     Result=GetRowData(Rec,FetchIntrenal);
+--   end;
 InObject Private
 
 end
