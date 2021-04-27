@@ -26,6 +26,7 @@ inclass
 inobject
   request: AutoObject; --XMLHTTPRequest текущего запроса
   Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
+  ParserHandle: Integer[]; --Коды ошибок, которые обрабатывает парсер
   postprocess: TUL.FuncObj; --Дополнительная обработка результата
   result_: Variant;
   ready_: Logical;
@@ -62,7 +63,7 @@ inobject
        return self.result_;
     fi;
     self.Wait;
-    result = HTTPCall.ParseResponse(self.request, self.Parser);
+    result = HTTPCall.ParseResponse(self.request, self.Parser, self.ParserHandle);
     if self.postprocess <> nil then
        result = self.postprocess.Call([result]);
     end;

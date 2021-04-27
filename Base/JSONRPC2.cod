@@ -1,0 +1,81 @@
+﻿--WebTL - библиотека для работа с технологиями Интернет (c) Златовратский Павел(ТБ.Бюджет), 2021
+
+--Данный проект является свободным программным обеспечением. Вы вправе распространять его
+--и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
+--более поздней версии Стандартной Общественной Лицензии Ограниченного Применения GNU,
+--опубликованной Free Software Foundation.
+
+--Мы распространяем этот проект в надежде на то, что он будет вам полезен, однако
+--НЕ ПРЕДОСТАВЛЯЕМ НА НЕГО НИКАКИХ ГАРАНТИЙ, в том числе ГАРАНТИИ ТОВАРНОГО СОСТОЯНИЯ ПРИ ПРОДАЖЕ
+--и ПРИГОДНОСТИ ДЛЯ ИСПОЛЬЗОВАНИЯ В КОНКРЕТНЫХ ЦЕЛЯХ. Для получения более подробной информации
+--ознакомьтесь со Стандартной Общественной Лицензией Ограниченного Применений GNU.
+
+--Вместе с данным проектом вы должны были получить экземпляр Стандартной Общественной Лицензии
+--Ограниченного Применения GNU. Если вы его не получили, сообщите об этом в Software Foundation, Inc.,
+--59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+class  inherited HTTPCall "JSONRPC 2.0";
+
+inclass
+  func WrapMethod(Method: String; params:Variant):Storage;
+    Result = Storage.Create;
+    Result.jsonrpc = "2.0";
+    Result.method = Method;
+    Result.params = params;
+    Result.id = Random(100);
+  end;
+
+  func UnWrapResult(aRes: Variant):Variant;
+  var sRes:Storage;
+    if varType(aRes) = VarString then
+      sRes = TUL.JSON.Parse(aRes);
+    else
+      sRes = aRes;
+    fi;
+    if sRes.FieldExists('result') then
+      Result = sRes.GetField('result');
+    elsif sRes.FieldExists('error'):
+      SetError(sRes.error.code, sRes.error.message);
+    fi;
+  end;
+
+inclass
+  func CreateEx(aHost:string; aMethod:String; aParList:Logical=False):JSONRPC2;
+  --* INPUTS
+  --* HOST - адрес сервера со слешем на конце!
+  --* Mapper - как разбирать результат
+    Result = Create;
+    Result.Host = aHost;
+    Result.MethodName = aMethod;
+    Result.ParList = aParList;
+    result.Hdrs = Storage.Create;
+    result.Hdrs['Accept']='application/json';
+    result.Hdrs['Content-Type']='application/json';
+
+    Result.Parser = TUL.ClassMeth.CreateExS("WebTL.JSONRPC2.UnWrapResult");
+  end;
+
+inobject
+  var Host: String;
+  var MethodName: String;
+  var ParList: Logical;
+  var Hdrs: Storage;
+
+  func Вызвать synonym Call(Params:Variant[]): Variant;
+    var AsyncCla: Class;
+    var Req: Storage;
+    if ParList then
+      Req = WrapMethod(MethodName, Params);
+    else
+      Req = WrapMethod(MethodName, Params[1]);
+    fi;
+    Result = self.DoRequest(self.host, "POST", TUL.JSON.Encode(Req, True), self.Hdrs);--TODO: UTF8??
+
+    AsyncCla = FindClass('WebTL.HTTPAsync');
+    if VarType(result) = VarObject and result.InheritsFrom(AsyncCla) then
+       Result.id = Str(Req.id);
+    end;
+
+  end;
+
+end

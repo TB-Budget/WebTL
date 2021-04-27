@@ -34,7 +34,7 @@ inobject
     var AsyncCla: Class;
     Result = self.DoRequest(self.host + Params[1]);
 
-    AsyncCla = FindClass('XMLRPC.HTTPAsync');
+    AsyncCla = FindClass('WebTL.HTTPAsync');
     if result.InheritsFrom(AsyncCla) then
        Result.id = self.host + Params[1];
     end;

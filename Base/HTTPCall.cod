@@ -20,12 +20,12 @@ inclass
      const AnsiStr: String; AnsiStrL: Integer; var WStr: String; WStrL: Integer) :Integer;
     library "kernel32" name "MultiByteToWideChar";
 
-  func ParseResponse(request: Object; Parser: Variant): Variant;
+  func ParseResponse(request: Object; Parser: Variant; ParserHandle:Integer[]): Variant;
   var xRes: AutoObject;
   var tmp: String;
   var tmpI:Integer;
     --Ошибки HTTP
-    if request.status >= 300 then
+    if request.status >= 300 and not request.status in ParserHandle then
        --Данные с кодом 3хх - тоже ошибки
        SetError(request.status, request.statusText);
     end;
@@ -58,6 +58,7 @@ inobject
   Parser: Variant; --Ссылка на метод-парсер или его кодовое обозначение
   Username: String;  --Логин на страничку (если нужен)
   Password: String;  --Пароль от логина на страничку (если нужен)
+  ParserHandle: Integer[]; --Коды ошибок, которые обрабатывает парсер
   Timeouts: Integer[]; --Таймауты
 
   proc setTimeouts(resolveTimeout:Integer=60; connectTimeout:Integer=60;
@@ -79,6 +80,7 @@ inobject
     if Async then
       Result = AsyncCla.Create;
       Result.Parser = Parser;
+      Result.ParserHandle = ParserHandle;
       request = Result.request;
     else
       request = AutoObject.Create("Msxml2.ServerXMLHTTP.6.0");
@@ -106,7 +108,7 @@ inobject
     fi;
 
     if not Async then  --Асинхронка уже свой запрос получила и ждет ответа
-       return HTTPCall.ParseResponse(request, self.Parser);
+       return HTTPCall.ParseResponse(request, self.Parser, self.ParserHandle);
     end;
     --Возврат асинхронного ответа будет за счёт присовения его в Result ранее
   end;
